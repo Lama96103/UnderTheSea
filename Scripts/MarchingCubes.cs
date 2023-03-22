@@ -6,8 +6,7 @@ public partial class MarchingCubes : Node3D
 {
 	[Export(PropertyHint.Range,"-1,1")] private float SurfaceLevel = 0.5f;
 	[Export] private float CubeSize = 1;
-	[Export] private float ChunkSize = 50;
-	[Export] private float ChunkHeight = 25;
+	[Export] private int ChunkSize = 20;
 
 
 	private FastNoiseLite noise = new FastNoiseLite();
@@ -22,8 +21,8 @@ public partial class MarchingCubes : Node3D
     	noise.FractalOctaves = 4;
     	noise.Frequency = 1.0f / 20.0f;
 
+		PerformanceTest();
 		
-		GenerateChunkComputeShader(Vector3.Zero);
 		//GenerateChunk(Vector3.Zero);
 		//GenerateChunk(Vector3.Forward * ChunkSize);
 	}
@@ -33,7 +32,7 @@ public partial class MarchingCubes : Node3D
 	{
 		if(cachedValues.ContainsKey(pos)) return cachedValues[pos];
 		float value = (noise.GetNoise3D(pos.X, pos.Y, pos.Z) + 1) / 2;
-		if(pos.Y < -(ChunkHeight/2)+1) value = 1;
+		if(pos.Y < -(ChunkSize/2)+1) value = 1;
 		cachedValues.Add(pos, value);
 		return value;
 	}
@@ -44,28 +43,40 @@ public partial class MarchingCubes : Node3D
 		RenderingDevice rd = RenderingServer.CreateLocalRenderingDevice();
 
 		// Load GLSL shader
-		RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://Scripts/Shader/marching_cube.glsl");
+		RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://Scripts/Shader/marching_noise.glsl");
 		RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
 		Rid shader = rd.ShaderCreateFromSpirV(shaderBytecode);
 
 
+		int size = 20;
+
+
 		// Prepare our data. We use floats in the shader, so we need 32 bit.
-		float[] input = new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		byte[] inputBytes = new byte[input.Length * sizeof(float)];
-		Buffer.BlockCopy(input, 0, inputBytes, 0, inputBytes.Length);
+		//float[] input = new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		//byte[] inputBytes = new byte[input.Length * sizeof(float)];
+		//Buffer.BlockCopy(input, 0, inputBytes, 0, inputBytes.Length);
 
 		// Create a storage buffer that can hold our float values.
 		// Each float has 4 bytes (32 bit) so 10 x 4 = 40 bytes
-		Rid buffer = rd.StorageBufferCreate((uint)inputBytes.Length, inputBytes);
+		//Rid buffer = rd.StorageBufferCreate((uint)inputBytes.Length, inputBytes);
+		Rid outputBuffer = rd.StorageBufferCreate((uint)(size*size*size) * sizeof(float));
 
 		// Create a uniform to assign the buffer to the rendering device
-		RDUniform uniform = new RDUniform
+		/*RDUniform uniform = new RDUniform
 		{
 			UniformType = RenderingDevice.UniformType.StorageBuffer,
 			Binding = 0
 		};
 		uniform.AddId(buffer);
-		Rid uniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { uniform }, shader, 0);
+		*/
+		RDUniform uniformOutput = new RDUniform
+		{
+			UniformType = RenderingDevice.UniformType.StorageBuffer,
+			Binding = 0
+		};
+		uniformOutput.AddId(outputBuffer);
+
+		Rid uniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { uniformOutput }, shader, 0);
 
 		// Create a compute pipeline
 		Rid pipeline = rd.ComputePipelineCreate(shader);
@@ -80,18 +91,34 @@ public partial class MarchingCubes : Node3D
 		rd.Sync();
 
 		// Read back the data from the buffers
-		byte[] outputBytes = rd.BufferGetData(buffer);
-		float[] output = new float[input.Length];
+		byte[] outputBytes = rd.BufferGetData(outputBuffer);
+		float[] output = new float[size*size*size];
 		Buffer.BlockCopy(outputBytes, 0, output, 0, outputBytes.Length);
-		GD.Print("Input: ", input.Join());
+
 		GD.Print("Output: ", output.Join());
+	}
+
+	private void PerformanceTest()
+	{
+		Vector3 position = Vector3.Zero;
+
+		Stopwatch s = Stopwatch.StartNew();
+		GenerateChunkComputeShader(Vector3.Zero);
+		s.Stop();
+		GD.Print("Took " + s.Elapsed.TotalMilliseconds + " s to generate");
+
+		s.Restart();
+		GenerateGridData(position);
+		s.Stop();
+		GD.Print("Took " + s.Elapsed.TotalMilliseconds + " s to generate");
+
 	}
 
 	private void GenerateChunk(Vector3 position)
 	{
 		Stopwatch chunkGenSp = Stopwatch.StartNew();
 		float size = ChunkSize / 2;
-		float height = ChunkHeight / 2;
+		float height = ChunkSize / 2;
 		ArrayMesh mesh = new ArrayMesh();
 		SurfaceTool tool = new SurfaceTool();
 		tool.Begin(Mesh.PrimitiveType.Triangles);
@@ -103,7 +130,11 @@ public partial class MarchingCubes : Node3D
 		for(float z = -size; z < size; z+=CubeSize)
 		{
 			int cubeIndex = 0;
+			Stopwatch s = Stopwatch.StartNew();
 			Grid grid = GetGrid(position.X + x, position.Y + y, position.Z + z);
+			s.Stop();
+			GD.Print("Took " + s.Elapsed.TotalMilliseconds + " s to generate cube");
+			s.Restart();
 
 			if(grid.val[0] < SurfaceLevel) cubeIndex |= 1;
 			if(grid.val[1] < SurfaceLevel) cubeIndex |= 2;
@@ -167,6 +198,9 @@ public partial class MarchingCubes : Node3D
 				tool.SetUV(uv[i]);
 				tool.AddVertex(vertices[i]);
 			}
+
+					s.Stop();
+			GD.Print("Took " + s.Elapsed.TotalMilliseconds + " s to generate cube mesh");
 		}
 
 		Stopwatch sp = Stopwatch.StartNew();
@@ -222,8 +256,6 @@ public partial class MarchingCubes : Node3D
 		grid.val[6] = GetValue(grid.p[6]);
 		grid.p[7] = new Vector3(x , y + spacing, z + spacing);
 		grid.val[7] = GetValue(grid.p[7]);
-
-
 		return grid;
 	}
 
@@ -233,4 +265,47 @@ public partial class MarchingCubes : Node3D
 		public float[] val = new float[8];
 	}
 
+	class CubeSample
+	{
+		public Vector3[] Points = new Vector3[8];
+		public float[] Values = new float[8];
+	}
+
+
+	private System.Collections.Generic.List<CubeSample> GenerateGridData(Vector3 rootPos)
+	{
+		float size = ChunkSize / 2;
+
+
+		System.Collections.Generic.List<CubeSample> cubes = new System.Collections.Generic.List<CubeSample>();
+
+		for(float x = -size; x < size; x += CubeSize)
+		for(float y = -size; y < size; y += CubeSize)
+		for(float z = -size; z < size; z += CubeSize)
+		{
+			CubeSample grid = new CubeSample();
+			grid.Points[0] = rootPos + new Vector3(x, y, z);
+			grid.Values[0] = GetValue(grid.Points[0]);
+			grid.Points[1] = new Vector3(x + CubeSize, y, z);
+			grid.Values[1] = GetValue(grid.Points[1]);
+
+			grid.Points[2] = new Vector3(x + CubeSize, y + CubeSize, z);
+			grid.Values[2] = GetValue(grid.Points[2]);
+			grid.Points[3] = new Vector3(x, y + CubeSize, z);
+			grid.Values[3] = GetValue(grid.Points[3]);
+
+			grid.Points[4] = new Vector3(x, y, z + CubeSize);
+			grid.Values[4] = GetValue(grid.Points[4]);
+			grid.Points[5] = new Vector3(x + CubeSize, y, z + CubeSize);
+			grid.Values[5] = GetValue(grid.Points[5]);
+
+			grid.Points[6] = new Vector3(x + CubeSize, y + CubeSize, z + CubeSize);
+			grid.Values[6] = GetValue(grid.Points[6]);
+			grid.Points[7] = new Vector3(x , y + CubeSize, z + CubeSize);
+			grid.Values[7] = GetValue(grid.Points[7]);
+			cubes.Add(grid);
+		}
+
+		return cubes;
+	}
 }
