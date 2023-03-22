@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://oy0u5821rpgr"]
+
+[ext_resource type="Script" path="res://Scenes/MarchingCubes.cs" id="1_8i0pv"]
+[ext_resource type="PackedScene" uid="uid://dx15j3pixy673" path="res://Prefabs/Point.tscn" id="2_tl3hd"]
+
+[node name="Root" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 60)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.398269, 0.917269, 0, -0.917269, 0.398269, 0, 5.19235, 0)
+
+[node name="MarchingCubes" type="Node3D" parent="."]
+script = ExtResource("1_8i0pv")
+
+[node name="Point" parent="." instance=ExtResource("2_tl3hd")]
+transform = Transform3D(0.999973, 0, 0.00729541, 0, 1, 0, -0.00729541, 0, 0.999973, 0, 0, 0)
