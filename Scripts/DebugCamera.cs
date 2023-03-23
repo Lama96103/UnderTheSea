@@ -9,13 +9,23 @@ public partial class DebugCamera : Camera3D
 	private float totalPitch = 0.0f;
 	private Vector2 mousePosition = Vector2.Zero;
 
-	public override void _Ready()
-	{
-		Input.MouseMode = Input.MouseModeEnum.Captured;
-	}
+	private bool isActive = false;
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
+	{
+		if(Input.IsActionJustPressed("debug_camera_activate"))
+		{
+			isActive = !isActive;
+			if(isActive)
+				Input.MouseMode = Input.MouseModeEnum.Captured;
+			else
+				Input.MouseMode = Input.MouseModeEnum.Visible;
+		}
+
+		if(isActive) CalculateCamera((float)delta);
+	}	
+
+	private void CalculateCamera(float delta)
 	{
 		Vector3 move = Vector3.Zero;
 		if(Input.IsActionPressed("debug_camera_forward")) move += -this.Transform.Basis.Z;
@@ -25,9 +35,9 @@ public partial class DebugCamera : Camera3D
 		else if(Input.IsActionPressed("debug_camera_left")) move += -this.Transform.Basis.X;
 
 
-		this.Position += move * Speed * (float)delta;
+		this.Position += move * Speed * delta;
 
-		UpdateMouse(mousePosition * (float)delta);
+		UpdateMouse(mousePosition * delta);
 		this.mousePosition = Vector2.Zero;
 
 
@@ -36,8 +46,7 @@ public partial class DebugCamera : Camera3D
 			GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
 			GetTree().Quit();
 		}
-			
-	}	
+	}
 
 	public override void _Input(InputEvent @event)
 	{

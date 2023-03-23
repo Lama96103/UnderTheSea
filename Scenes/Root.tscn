@@ -1,7 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://clus3ktj3vy7t"]
+[gd_scene load_steps=4 format=3 uid="uid://blj0kq8voxv1g"]
 
 [ext_resource type="Script" path="res://Scripts/DebugCamera.cs" id="1_ilr4a"]
-[ext_resource type="Script" path="res://Scripts/MarchingCubes.cs" id="1_re20d"]
+[ext_resource type="Script" path="res://MarchingCubes/MarchingCubesGenerater.cs" id="2_qh6ab"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_b7gfg"]
 
@@ -17,7 +17,7 @@ Sensitivity = 2.0
 transform = Transform3D(0.549825, -0.803407, 0.228538, 0, 0.273607, 0.961842, -0.83528, -0.528845, 0.150436, 2.11536, 0, 0)
 
 [node name="MarchingCubes" type="Node3D" parent="."]
-script = ExtResource("1_re20d")
+script = ExtResource("2_qh6ab")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_b7gfg")
