@@ -4,10 +4,19 @@
 const int size = 20;
 
 // Invocations in the (x, y, z) dimension
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 10, local_size_y = 10, local_size_z = 10) in;
 
 
-layout(set = 0, binding = 0, std430) restrict buffer NoiseBufferData {
+layout(set = 0, binding = 0, std430) restrict buffer InputBufferData {
+    vec3 rootPos;
+    float noiseScale;
+    float octaves;
+    float persistence;
+    float lacunarity;
+}
+noise_input_data;
+
+layout(set = 1, binding = 0, std430) restrict buffer NoiseBufferData {
     vec4 point[];
 }
 noise_buffer_data;
@@ -30,13 +39,13 @@ void main() {
 
 
     
-    float noiseScale = 0.5;
-    float octaves = 4;
-    float persistence = 0.5;
-    float lacunarity = 2;
-    vec3 rootPos = vec3(0,0,0);
+    float noiseScale = noise_input_data.noiseScale;
+    float octaves = noise_input_data.octaves;
+    float persistence = noise_input_data.persistence;
+    float lacunarity = noise_input_data.lacunarity;
+    vec3 rootPos = noise_input_data.rootPos;
 
-    vec3 pos = gl_GlobalInvocationID.xyz + rootPos;
+    vec3 pos = rootPos + gl_GlobalInvocationID.xyz;
 
     float noise = 0;
 
