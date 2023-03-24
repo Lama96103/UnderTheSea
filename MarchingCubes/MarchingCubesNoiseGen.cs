@@ -102,6 +102,7 @@ namespace MarchingCubes
             cachedValues.Add(pos, value);
             return value;
         }
+
         private List<DataPoint> GenerateCPU(Vector3 rootPos)
         {
             float size = ChunkSize / 2;
@@ -150,11 +151,15 @@ namespace MarchingCubes
         {
             Error err = rd.BufferUpdate(inputBuffer, 0, InputBufferData.GetSize(), noiseSettings.GetBytes());
             GD.Print("Updated input buffer " + err);
+
+
+
+
             long computeList = rd.ComputeListBegin();
             rd.ComputeListBindComputePipeline(computeList, computePipeline);
             rd.ComputeListBindUniformSet(computeList, inputUniformSet, 0);
             rd.ComputeListBindUniformSet(computeList, resultUniformSet, 1);
-            rd.ComputeListDispatch(computeList, xGroups: 2, yGroups: 2, zGroups: 2);
+            rd.ComputeListDispatch(computeList, xGroups: (uint)ChunkSize, yGroups: (uint)ChunkSize, zGroups: (uint)ChunkSize);
             rd.ComputeListEnd();
 
             // Submit to GPU and wait for sync
@@ -189,7 +194,7 @@ namespace MarchingCubes
     public class InputBufferData
     {
         public Vector3 rootPos = Vector3.Zero;
-        public float noiseScale = 1;
+        public float noiseScale = 0.5f;
         public float octaves = 4f;
         public float persistence = 0.5f;
         public float lacunarity = 2f;

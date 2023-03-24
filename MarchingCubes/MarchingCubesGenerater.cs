@@ -8,7 +8,7 @@ namespace MarchingCubes
     public partial class MarchingCubesGenerater : Node3D
     {
         [Export(PropertyHint.Range, "-1,1")] public float SurfaceLevel = 0.5f;
-        [Export] private int ChunkSize = 20;
+        [Export] private int ChunkSize = 50;
 
 		private MarchingCubesNoiseGen noiseGen = null;
 

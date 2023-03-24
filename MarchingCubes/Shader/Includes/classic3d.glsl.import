@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://4ob5idq18v7"
+path="res://.godot/imported/classic3d.glsl-b56885e1b2a8ce29cc5d575f38189976.res"
+
+[deps]
+
+source_file="res://MarchingCubes/Shader/Includes/classic3d.glsl"
+dest_files=["res://.godot/imported/classic3d.glsl-b56885e1b2a8ce29cc5d575f38189976.res"]
+
+[params]
+

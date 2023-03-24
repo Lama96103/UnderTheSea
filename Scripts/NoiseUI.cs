@@ -32,28 +32,33 @@ public partial class NoiseUI : VBoxContainer
 	{
 		GetNode<Label>("NoiseScaleText").Text = "Noise Scale : " + val.ToString("0.00");
 		generator.NoiseScale = val;
+		OnGenerateNoise();
 	}
 
 	public void OnUpdateOctaves(float val)
 	{
 		GetNode<Label>("OctavesText").Text = "Octaves : " + val.ToString("0.00");
 		generator.Octaves = val;
+		OnGenerateNoise();
 	}
 	public void OnUpdatePersistence(float val)
 	{
 		GetNode<Label>("PersistenceText").Text = "Persistence : " + val.ToString("0.00");
 		generator.Persistence = val;
+		OnGenerateNoise();
 	}
 	public void OnUpdateLacunarity(float val)
 	{
 		GetNode<Label>("LacunarityText").Text = "Lacunarity : " + val.ToString("0.00");
 		generator.Lacunarity = val;
+		OnGenerateNoise();
 	}
 
 	public void OnUpdateSurfaceLevel(float val)
 	{
 		GetNode<Label>("SurfaceText").Text = "Surface Level : " + val.ToString("0.00");
 		generator.SurfaceLevel = val;
+		OnGenerateMap();
 	}
 
 	public void OnGenerateNoise()
