@@ -8,18 +8,19 @@ namespace MarchingCubes
     public partial class MarchingCubesGenerater : Node3D
     {
         [Export(PropertyHint.Range, "-1,1")] public float SurfaceLevel = 0.5f;
-        [Export] private int ChunkSize = 50;
+        private int ChunkSize = 16;
 
 		private MarchingCubesNoiseGen noiseGen = null;
+		private MarchingCubesMeshGen meshGen = null;
 
 
 		public float NoiseScale = 0.5f;
-		public float Octaves = 4;
+		public int Octaves = 4;
 		public float Persistence = 0.5f;
 		public float Lacunarity = 2f;
 
 		private MeshInstance3D meshInstance3D = null;
-		private List<DataPoint> noiseMap = null;
+		private byte[] noiseMap = null;
 
 
         // Called when the node enters the scene tree for the first time.
@@ -30,7 +31,8 @@ namespace MarchingCubes
 			noiseGen = new MarchingCubesNoiseGen();
 			noiseGen.Init(ChunkSize);
 
-
+			meshGen = new MarchingCubesMeshGen();
+			meshGen.Init(ChunkSize);
         }
 
 		
@@ -38,8 +40,9 @@ namespace MarchingCubes
 		public void UpdateNoise(Vector3 rootPos)
 		{
 			Stopwatch sp = Stopwatch.StartNew();
-			noiseGen.UpdateSettings(rootPos, NoiseScale, Octaves, Persistence, Lacunarity);
-			noiseMap = noiseGen.GenerateNoise(Vector3.Zero, true);
+			noiseGen.UpdateSettings(rootPos, NoiseScale, Octaves, Persistence, Lacunarity, ChunkSize);
+			noiseMap = noiseGen.GenerateNoise(Vector3.Zero);
+			GD.Print("Noise lenght " + (noiseMap.Length / 4 / sizeof(float)));
             sp.Stop();
 			GD.Print("Took " + sp.Elapsed.TotalMilliseconds + " ms to generate noise");
 		}
@@ -47,14 +50,48 @@ namespace MarchingCubes
 		public void UpdateMesh(Vector3 rootPos)
 		{
 			Stopwatch sp = Stopwatch.StartNew();
-			GenerateChunk(Vector3.Zero, noiseMap);
+			List<Vector3> vertices = meshGen.GenerateMesh(noiseMap, SurfaceLevel);
+			GenerateMesh(rootPos, vertices);
 			GD.Print("Took " + sp.Elapsed.TotalMilliseconds + " ms to generate mesh");
 		}
+
+
+		private void GenerateMesh(Vector3 rootPos, List<Vector3> vertices)
+		{
+			if(meshInstance3D != null)
+			{
+				RemoveChild(meshInstance3D);
+				meshInstance3D.QueueFree();
+			}
+
+			ArrayMesh mesh = new ArrayMesh();
+            SurfaceTool tool = new SurfaceTool();
+			tool.Begin(Mesh.PrimitiveType.Triangles);
+			foreach(Vector3 v in vertices)
+			{
+				tool.SetColor(new Color(1, 1, 1, 1));
+				//tool.SetUV(uv[i]);
+				tool.AddVertex(v);
+			}
+
+			Stopwatch sp = Stopwatch.StartNew();
+            //tool.Index();
+            tool.GenerateNormals();
+            // tool.GenerateTangents();
+            tool.Commit(mesh);
+            sp.Stop();
+            GD.Print("Took " + sp.Elapsed.TotalMilliseconds + " ms to optimize mesh");
+
+            meshInstance3D = new MeshInstance3D();
+            meshInstance3D.Mesh = mesh;
+            this.AddChild(meshInstance3D);
+		}
+
 
      
 
  
-		
+		/*
 		private int IndexFromCoords(int x, int y, int z) 
 		{
 			return z * ChunkSize * ChunkSize + y * ChunkSize + x;
@@ -191,6 +228,7 @@ namespace MarchingCubes
             p.Z = p1.Z + mu * (p2.Z - p1.Z);
             return p;
         }
+		*/
 		
     }
 }

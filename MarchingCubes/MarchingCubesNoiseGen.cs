@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -13,8 +14,10 @@ namespace MarchingCubes
         private Godot.Collections.Dictionary<Vector3, float> cachedValues = new Godot.Collections.Dictionary<Vector3, float>();
         
         private RenderingDevice rd;
+        private Rid shader;
         private Rid inputBuffer;
         private Rid resultBuffer;
+        private RDUniform resultBufferUniform;
 
         private Rid inputUniformSet;
         private Rid resultUniformSet;
@@ -22,7 +25,7 @@ namespace MarchingCubes
 
 
 
-        private InputBufferData noiseSettings = new InputBufferData();
+        private InputNoiseBufferData noiseSettings = new InputNoiseBufferData();
         private int ChunkSize;
 
         public void Init(int chunkSize)
@@ -46,11 +49,11 @@ namespace MarchingCubes
             // Load GLSL shader
             RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://MarchingCubes/Shader/marching_noise.glsl");
             RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
-            Rid shader = rd.ShaderCreateFromSpirV(shaderBytecode);
+            shader = rd.ShaderCreateFromSpirV(shaderBytecode);
 
 
-            InputBufferData data = new InputBufferData();
-            inputBuffer = rd.StorageBufferCreate(InputBufferData.GetSize(), data.GetBytes());
+            InputNoiseBufferData data = new InputNoiseBufferData();
+            inputBuffer = rd.StorageBufferCreate(InputNoiseBufferData.GetSize(), data.GetBytes());
             RDUniform inputBufferUniform = new RDUniform
             {
                 UniformType = RenderingDevice.UniformType.StorageBuffer,
@@ -59,12 +62,9 @@ namespace MarchingCubes
             inputBufferUniform.AddId(inputBuffer);
             inputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { inputBufferUniform }, shader, 0);
 
-            
-
-
             uint resultBufferSize = (sizeof(float) * 4) * (uint)(ChunkSize * ChunkSize * ChunkSize);
             resultBuffer = rd.StorageBufferCreate(resultBufferSize);
-            RDUniform resultBufferUniform = new RDUniform
+            resultBufferUniform = new RDUniform
             {
                 UniformType = RenderingDevice.UniformType.StorageBuffer,
                 Binding = 0
@@ -76,22 +76,22 @@ namespace MarchingCubes
             computePipeline = rd.ComputePipelineCreate(shader);
         }
 
-        public void UpdateSettings(Vector3 rootPos, float noiseScale, float octaves, float persistence, float lacunarity)
+        public void UpdateSettings(Vector3 rootPos, float noiseScale, int octaves, float persistence, float lacunarity, int chunkSize)
         {
-            noiseSettings = new InputBufferData
+            noiseSettings = new InputNoiseBufferData
             {
                 rootPos = rootPos,
                 noiseScale = noiseScale,
                 octaves = octaves,
                 persistence = persistence,
-                lacunarity = lacunarity
+                lacunarity = lacunarity,
+                chunkSize = chunkSize
             };
         }
 
-        public List<DataPoint> GenerateNoise(Vector3 rootPos, bool runOnGPU)
+        public byte[] GenerateNoise(Vector3 rootPos)
         {
-            if(runOnGPU) return GenerateGPU(rootPos);
-            return GenerateCPU(rootPos);
+            return GenerateGPU(rootPos);
         }
 
         private float GetValue(Vector3 pos)
@@ -147,13 +147,12 @@ namespace MarchingCubes
             return cubes;
         }
 
-        private List<DataPoint> GenerateGPU(Vector3 rootPos)
+        private byte[] GenerateGPU(Vector3 rootPos)
         {
-            Error err = rd.BufferUpdate(inputBuffer, 0, InputBufferData.GetSize(), noiseSettings.GetBytes());
-            GD.Print("Updated input buffer " + err);
-
-
-
+            Stopwatch sp = Stopwatch.StartNew();
+            Error err = rd.BufferUpdate(inputBuffer, 0, InputNoiseBufferData.GetSize(), noiseSettings.GetBytes());
+            GD.Print("Updated input buffer " + err + " -> took " + sp.ElapsedMilliseconds);
+            sp.Restart();
 
             long computeList = rd.ComputeListBegin();
             rd.ComputeListBindComputePipeline(computeList, computePipeline);
@@ -161,13 +160,20 @@ namespace MarchingCubes
             rd.ComputeListBindUniformSet(computeList, resultUniformSet, 1);
             rd.ComputeListDispatch(computeList, xGroups: (uint)ChunkSize, yGroups: (uint)ChunkSize, zGroups: (uint)ChunkSize);
             rd.ComputeListEnd();
+            
 
             // Submit to GPU and wait for sync
             rd.Submit();
             rd.Sync();
 
+            GD.Print("Executed compute shader in " + sp.ElapsedMilliseconds);
+            sp.Restart();
+
             // Read back the data from the buffers
             byte[] outputBytes = rd.BufferGetData(resultBuffer);
+            GD.Print("Got data in  " + sp.ElapsedMilliseconds);
+            return outputBytes;
+            /*
             float[] output = new float[ChunkSize * ChunkSize * ChunkSize * 4];
             Buffer.BlockCopy(outputBytes, 0, output, 0, outputBytes.Length);
 
@@ -188,20 +194,22 @@ namespace MarchingCubes
             GD.Print("Max " + maxVal);
 
             return cubes;
+            */
         }
     }
 
-    public class InputBufferData
+    public class InputNoiseBufferData
     {
         public Vector3 rootPos = Vector3.Zero;
         public float noiseScale = 0.5f;
-        public float octaves = 4f;
+        public int octaves = 4;
         public float persistence = 0.5f;
         public float lacunarity = 2f;
+        public int chunkSize = 50;
 
         public byte[] GetBytes()
         {
-            float[] data = new float[] {rootPos.X, rootPos.Y, rootPos.Z, noiseScale, octaves, persistence, lacunarity};
+            float[] data = new float[] {rootPos.X, rootPos.Y, rootPos.Z, noiseScale, octaves, persistence, lacunarity, chunkSize};
             byte[] dataBytes = new byte[data.Length * sizeof(float)];
             Buffer.BlockCopy(data, 0, dataBytes, 0, dataBytes.Length);
             return dataBytes;
@@ -209,7 +217,7 @@ namespace MarchingCubes
 
         public static uint GetSize()
         {
-            return (sizeof(float) * 7);
+            return (sizeof(float) * 8);
         }
     }
 

@@ -1,8 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://blj0kq8voxv1g"]
+[gd_scene load_steps=6 format=3 uid="uid://blj0kq8voxv1g"]
 
 [ext_resource type="Script" path="res://Scripts/DebugCamera.cs" id="1_ilr4a"]
 [ext_resource type="Script" path="res://MarchingCubes/MarchingCubesGenerater.cs" id="2_qh6ab"]
 [ext_resource type="Script" path="res://Scripts/NoiseUI.cs" id="3_5p4dd"]
+[ext_resource type="Material" uid="uid://dbk1j1par5dmd" path="res://realistic_water_shader/art/water/Water.material" id="4_tyeud"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_nh8tl"]
+material = ExtResource("4_tyeud")
+size = Vector2(100, 100)
+subdivide_width = 100
+subdivide_depth = 100
 
 [node name="Root" type="Node3D"]
 
@@ -53,8 +60,7 @@ text = "Noise Scale"
 
 [node name="NoiseScaleSlider" type="HSlider" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-max_value = 25.0
-step = 0.25
+step = 0.5
 
 [node name="OctavesText" type="Label" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -105,6 +111,9 @@ step = 0.05
 layout_mode = 2
 text = "Generate Mesh
 "
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_nh8tl")
 
 [connection signal="value_changed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/NoiseScaleSlider" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnUpdateNoiseScale"]
 [connection signal="value_changed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/OctavesSlider" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnUpdateOctaves"]
