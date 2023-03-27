@@ -22,17 +22,21 @@ namespace MarchingCubes
 		private MeshInstance3D meshInstance3D = null;
 		private byte[] noiseMap = null;
 
+		private RenderingDevice renderingDevice;
+
 
         // Called when the node enters the scene tree for the first time.
         public override void _Ready()
         {
             GD.Randomize();
+
+			renderingDevice = RenderingServer.CreateLocalRenderingDevice();
 			
 			noiseGen = new MarchingCubesNoiseGen();
-			noiseGen.Init(ChunkSize);
+			noiseGen.Init(ChunkSize, renderingDevice);
 
 			meshGen = new MarchingCubesMeshGen();
-			meshGen.Init(ChunkSize);
+			meshGen.Init(ChunkSize, renderingDevice);
         }
 
 		
@@ -40,7 +44,7 @@ namespace MarchingCubes
 		public void UpdateNoise(Vector3 rootPos)
 		{
 			Stopwatch sp = Stopwatch.StartNew();
-			noiseGen.UpdateSettings(rootPos, NoiseScale, Octaves, Persistence, Lacunarity, ChunkSize);
+			noiseGen.UpdateSettings(rootPos, NoiseScale, Octaves, Persistence, Lacunarity);
 			noiseMap = noiseGen.GenerateNoise(Vector3.Zero);
 			GD.Print("Noise lenght " + (noiseMap.Length / 4 / sizeof(float)));
             sp.Stop();
@@ -49,9 +53,12 @@ namespace MarchingCubes
 
 		public void UpdateMesh(Vector3 rootPos)
 		{
+			return;
+			
+			if(noiseMap.Length == 0) return;
 			Stopwatch sp = Stopwatch.StartNew();
 			List<Vector3> vertices = meshGen.GenerateMesh(noiseMap, SurfaceLevel);
-			GenerateMesh(rootPos, vertices);
+			if(vertices.Count != 0) GenerateMesh(rootPos, vertices);
 			GD.Print("Took " + sp.Elapsed.TotalMilliseconds + " ms to generate mesh");
 		}
 

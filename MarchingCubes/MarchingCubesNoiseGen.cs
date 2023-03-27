@@ -19,8 +19,7 @@ namespace MarchingCubes
         private Rid resultBuffer;
         private RDUniform resultBufferUniform;
 
-        private Rid inputUniformSet;
-        private Rid resultUniformSet;
+        private Rid mainUniformSet;
         private Rid computePipeline;
 
 
@@ -28,9 +27,11 @@ namespace MarchingCubes
         private InputNoiseBufferData noiseSettings = new InputNoiseBufferData();
         private int ChunkSize;
 
-        public void Init(int chunkSize)
+        public void Init(int chunkSize, RenderingDevice rd)
         {
             this.ChunkSize = chunkSize;
+            this.rd = rd;
+            GD.Print("Chunksize is " + chunkSize);
 
             // Init cpu noise
             noise = new FastNoiseLite();
@@ -43,9 +44,6 @@ namespace MarchingCubes
 
         private void InitComputeShader()
         {
-            // Create a local rendering device.
-            rd = RenderingServer.CreateLocalRenderingDevice();
-
             // Load GLSL shader
             RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://MarchingCubes/Shader/marching_noise.glsl");
             RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
@@ -60,23 +58,25 @@ namespace MarchingCubes
                 Binding = 0,
             };
             inputBufferUniform.AddId(inputBuffer);
-            inputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { inputBufferUniform }, shader, 0);
 
             uint resultBufferSize = (sizeof(float) * 4) * (uint)(ChunkSize * ChunkSize * ChunkSize);
             resultBuffer = rd.StorageBufferCreate(resultBufferSize);
             resultBufferUniform = new RDUniform
             {
                 UniformType = RenderingDevice.UniformType.StorageBuffer,
-                Binding = 0
+                Binding = 1
             };
             resultBufferUniform.AddId(resultBuffer);
-            resultUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { resultBufferUniform }, shader, 0);
+
+
+            mainUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { inputBufferUniform,resultBufferUniform }, shader, 0);
 
             // Create a compute pipeline
             computePipeline = rd.ComputePipelineCreate(shader);
+            GD.Print("Pipeline is valied = " + computePipeline.IsValid);
         }
 
-        public void UpdateSettings(Vector3 rootPos, float noiseScale, int octaves, float persistence, float lacunarity, int chunkSize)
+        public void UpdateSettings(Vector3 rootPos, float noiseScale, int octaves, float persistence, float lacunarity)
         {
             noiseSettings = new InputNoiseBufferData
             {
@@ -85,7 +85,7 @@ namespace MarchingCubes
                 octaves = octaves,
                 persistence = persistence,
                 lacunarity = lacunarity,
-                chunkSize = chunkSize
+                chunkSize = ChunkSize
             };
         }
 
@@ -151,13 +151,12 @@ namespace MarchingCubes
         {
             Stopwatch sp = Stopwatch.StartNew();
             Error err = rd.BufferUpdate(inputBuffer, 0, InputNoiseBufferData.GetSize(), noiseSettings.GetBytes());
-            GD.Print("Updated input buffer " + err + " -> took " + sp.ElapsedMilliseconds);
+            GD.Print("Updated input buffer " + err + " -> took " + sp.ElapsedMilliseconds + " ms");
             sp.Restart();
 
             long computeList = rd.ComputeListBegin();
             rd.ComputeListBindComputePipeline(computeList, computePipeline);
-            rd.ComputeListBindUniformSet(computeList, inputUniformSet, 0);
-            rd.ComputeListBindUniformSet(computeList, resultUniformSet, 1);
+            rd.ComputeListBindUniformSet(computeList, mainUniformSet, 0);
             rd.ComputeListDispatch(computeList, xGroups: (uint)ChunkSize, yGroups: (uint)ChunkSize, zGroups: (uint)ChunkSize);
             rd.ComputeListEnd();
             
@@ -166,14 +165,15 @@ namespace MarchingCubes
             rd.Submit();
             rd.Sync();
 
-            GD.Print("Executed compute shader in " + sp.ElapsedMilliseconds);
+
+            GD.Print("Executed compute shader in " + sp.ElapsedMilliseconds + " ms");
             sp.Restart();
 
             // Read back the data from the buffers
             byte[] outputBytes = rd.BufferGetData(resultBuffer);
             GD.Print("Got data in  " + sp.ElapsedMilliseconds);
-            return outputBytes;
-            /*
+           
+            
             float[] output = new float[ChunkSize * ChunkSize * ChunkSize * 4];
             Buffer.BlockCopy(outputBytes, 0, output, 0, outputBytes.Length);
 
@@ -193,8 +193,7 @@ namespace MarchingCubes
             GD.Print("Min " + minVal);
             GD.Print("Max " + maxVal);
 
-            return cubes;
-            */
+            return outputBytes;
         }
     }
 
@@ -205,11 +204,11 @@ namespace MarchingCubes
         public int octaves = 4;
         public float persistence = 0.5f;
         public float lacunarity = 2f;
-        public int chunkSize = 50;
+        public int chunkSize = 16;
 
         public byte[] GetBytes()
         {
-            float[] data = new float[] {rootPos.X, rootPos.Y, rootPos.Z, noiseScale, octaves, persistence, lacunarity, chunkSize};
+            float[] data = new float[] {rootPos.X, rootPos.Y, rootPos.Z, noiseScale, (float)octaves, persistence, lacunarity, (float)chunkSize};
             byte[] dataBytes = new byte[data.Length * sizeof(float)];
             Buffer.BlockCopy(data, 0, dataBytes, 0, dataBytes.Length);
             return dataBytes;

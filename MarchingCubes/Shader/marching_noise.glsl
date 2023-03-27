@@ -1,7 +1,7 @@
 #[compute]
 #version 450
 
-#include "Includes/simplex3d.glsl"
+#include "Includes/noise.glsl"
 
 layout(set = 0, binding = 0, std430) restrict buffer InputBufferData {
     vec3 rootPos;
@@ -13,7 +13,7 @@ layout(set = 0, binding = 0, std430) restrict buffer InputBufferData {
 }
 noise_input_data;
 
-layout(set = 1, binding = 0, std430) restrict buffer NoiseBufferData {
+layout(set = 0, binding = 1, std430) restrict buffer NoiseBufferData {
     vec4 point[];
 }
 noise_buffer_data;
@@ -32,7 +32,10 @@ void main() {
 
     
     vec3 pos = noise_input_data.rootPos + gl_GlobalInvocationID.xyz;
+    
+    //float finalNoise = perlin(pos);
 
+    
     float frequency = noise_input_data.noiseScale / 100;
     float amplitude = 1;
     
@@ -42,7 +45,7 @@ void main() {
     float noise = 0;
     for(int i = 0; i < int(noise_input_data.octaves); i++)
     {
-        float n = snoise(pos * frequency);
+        float n = perlin(pos * frequency);
         float v = 1-abs(n);
         v = v * v;
         v *= weight;
@@ -55,9 +58,8 @@ void main() {
 
     }
 
-    float finalNoise = noise;
     
 
 
-    noise_buffer_data.point[index] = vec4(pos, finalNoise);
+    noise_buffer_data.point[index] = vec4(pos, noise);
 }

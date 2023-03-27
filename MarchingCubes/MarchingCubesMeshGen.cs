@@ -26,17 +26,15 @@ namespace MarchingCubes
 
         private uint ChunkSize;
 
-        public void Init(int chunkSize)
+        public void Init(int chunkSize, RenderingDevice rd)
         {
             ChunkSize = (uint)chunkSize;
+            this.rd = rd;
             InitComputeShader();
         }
 
         private void InitComputeShader()
         {
-            // Create a local rendering device.
-            rd = RenderingServer.CreateLocalRenderingDevice();
-
             // Load GLSL shader
             RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://MarchingCubes/Shader/marching_cube.glsl");
             RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
