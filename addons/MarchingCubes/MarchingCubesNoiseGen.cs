@@ -45,7 +45,7 @@ namespace MarchingCubes
         private void InitComputeShader()
         {
             // Load GLSL shader
-            RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://MarchingCubes/Shader/marching_noise.glsl");
+            RDShaderFile shaderFile = GD.Load<RDShaderFile>("Shader/marching_noise.glsl");
             RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
             shader = rd.ShaderCreateFromSpirV(shaderBytecode);
 

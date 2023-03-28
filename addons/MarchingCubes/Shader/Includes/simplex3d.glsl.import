@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://d3l8227b2tg5r"
+path="res://.godot/imported/simplex3d.glsl-62be81ad8936389a2d40e6cbd098fdb4.res"
+
+[deps]
+
+source_file="res://addons/MarchingCubes/Shader/Includes/simplex3d.glsl"
+dest_files=["res://.godot/imported/simplex3d.glsl-62be81ad8936389a2d40e6cbd098fdb4.res"]
+
+[params]
+

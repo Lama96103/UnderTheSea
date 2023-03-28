@@ -36,7 +36,7 @@ namespace MarchingCubes
         private void InitComputeShader()
         {
             // Load GLSL shader
-            RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://MarchingCubes/Shader/marching_cube.glsl");
+            RDShaderFile shaderFile = GD.Load<RDShaderFile>("Shader/marching_cube.glsl");
             RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
             shader = rd.ShaderCreateFromSpirV(shaderBytecode);
 
