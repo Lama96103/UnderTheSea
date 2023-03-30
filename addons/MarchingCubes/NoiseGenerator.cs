@@ -58,6 +58,9 @@ namespace MarchingCubes
 
             inputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { inputBufferUniform }, shader, 0);
             outputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { currentDataBuffer.Uniform }, shader, 1);
+            GD.Print("Input uniform " + inputUniformSet.IsValid);
+            GD.Print("Output uniform " + outputUniformSet.IsValid);
+            
 
             // Create a compute pipeline
             computePipeline = rd.ComputePipelineCreate(shader);
@@ -80,12 +83,13 @@ namespace MarchingCubes
 
         public PointsDataBuffer Generate()
         {
+            long computeList = rd.ComputeListBegin();
+
             Stopwatch sp = Stopwatch.StartNew();
-            Error err = rd.BufferUpdate(inputBuffer, 0, InputNoiseBufferData.GetSize(), noiseSettings.GetBytes());
-            GD.Print("Updated input buffer " + err + " -> took " + sp.ElapsedMilliseconds + " ms");
+            //Error err = rd.BufferUpdate(inputBuffer, 0, InputNoiseBufferData.GetSize(), noiseSettings.GetBytes());
+            //GD.Print("Updated input buffer " + err + " -> took " + sp.ElapsedMilliseconds + " ms");
             sp.Restart();
 
-            long computeList = rd.ComputeListBegin();
             rd.ComputeListBindComputePipeline(computeList, computePipeline);
             rd.ComputeListBindUniformSet(computeList, inputUniformSet, 0);
             rd.ComputeListBindUniformSet(computeList, outputUniformSet, 1);
