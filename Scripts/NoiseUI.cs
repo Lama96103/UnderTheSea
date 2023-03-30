@@ -3,12 +3,12 @@ using System;
 
 public partial class NoiseUI : VBoxContainer
 {
-	private MarchingCubes.MarchingCubesGenerater generator;
+	private MarchingCubes.MarchingCubesController generator;
 	private bool didInitialied = false;
 
 	public override void _Ready()
 	{
-		generator = GetNode<MarchingCubes.MarchingCubesGenerater>("%MarchingCubes");
+		generator = GetNode<MarchingCubes.MarchingCubesController>("%MarchingCubes");
 
 		GetNode<Slider>("NoiseScaleSlider").Value = generator.NoiseScale;
 		OnUpdateNoiseScale(generator.NoiseScale);
@@ -69,13 +69,12 @@ public partial class NoiseUI : VBoxContainer
 	public void OnGenerateNoise()
 	{
 		if(!didInitialied) return;
-		generator.UpdateNoise(Vector3.Zero);
-		generator.UpdateMesh(Vector3.Zero);
+		generator.Generate(Vector3.Zero, true);
 	}
 
 	public void OnGenerateMap()
 	{
 		if(!didInitialied) return;
-		generator.UpdateMesh(Vector3.Zero);
+		generator.Generate(Vector3.Zero, false);
 	}
 }

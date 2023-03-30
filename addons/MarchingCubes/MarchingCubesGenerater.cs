@@ -1,4 +1,4 @@
-using Godot;
+/*using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,8 +10,8 @@ namespace MarchingCubes
         [Export(PropertyHint.Range, "-1,1")] public float SurfaceLevel = 0.5f;
         private int ChunkSize = 16;
 
-		private MarchingCubesNoiseGen noiseGen = null;
-		private MarchingCubesMeshGen meshGen = null;
+		private NoiseGenerator noiseGen = null;
+		private PointMeshGenerator meshGen = null;
 
 
 		public float NoiseScale = 0.5f;
@@ -32,10 +32,10 @@ namespace MarchingCubes
 
 			renderingDevice = RenderingServer.CreateLocalRenderingDevice();
 			
-			noiseGen = new MarchingCubesNoiseGen();
+			noiseGen = new NoiseGenerator();
 			noiseGen.Init(ChunkSize, renderingDevice);
 
-			meshGen = new MarchingCubesMeshGen();
+			meshGen = new PointMeshGenerator();
 			meshGen.Init(ChunkSize, renderingDevice);
         }
 
@@ -235,9 +235,9 @@ namespace MarchingCubes
             p.Z = p1.Z + mu * (p2.Z - p1.Z);
             return p;
         }
-		*/
 		
     }
 }
+		*/
 
 

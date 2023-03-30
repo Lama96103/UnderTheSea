@@ -7,14 +7,13 @@ using Godot;
 
 namespace MarchingCubes
 {
-    class MarchingCubesMeshGen
+    class PointMeshGenerator
     {
         
         private RenderingDevice rd;
         private Rid shader;
 
-        private Rid inputBuffer;
-        private RDUniform inputBufferUniform;
+
         private Rid settingsBuffer;
         private RDUniform settingsBufferUniform;
         private Rid outputBuffer;
@@ -26,7 +25,7 @@ namespace MarchingCubes
 
         private uint ChunkSize;
 
-        public void Init(int chunkSize, RenderingDevice rd)
+        public void Init(RenderingDevice rd, uint chunkSize)
         {
             ChunkSize = (uint)chunkSize;
             this.rd = rd;
@@ -36,20 +35,45 @@ namespace MarchingCubes
         private void InitComputeShader()
         {
             // Load GLSL shader
-            RDShaderFile shaderFile = GD.Load<RDShaderFile>("Shader/marching_cube.glsl");
+            RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://addons/MarchingCubes/Shader/marching_cube.glsl");
             RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
             shader = rd.ShaderCreateFromSpirV(shaderBytecode);
 
             // Create a compute pipeline
             computePipeline = rd.ComputePipelineCreate(shader);
+
+            uint maxTriangleCount = (ChunkSize * ChunkSize * ChunkSize) * 5;
+            outputBuffer = rd.StorageBufferCreate((sizeof(float) * 3) * maxTriangleCount);
+            ouputBufferUniform = new RDUniform
+            {
+                UniformType = RenderingDevice.UniformType.StorageBuffer,
+                Binding = 0
+            };
+            ouputBufferUniform.AddId(outputBuffer);
+            ouputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { ouputBufferUniform }, shader, 1);
+
+        
         }
 
-
-        public List<Vector3> GenerateMesh(byte[] points, float isolevel)
+        public void Update(PointsDataBuffer inputBuffer, float isolevel)
         {
-            CreateBuffers(points, isolevel);
+            float[] input = new float[] {isolevel, 0.0f, (int)ChunkSize};
+            byte[] inputBytes = new byte[input.Length * sizeof(float)];
+            Buffer.BlockCopy(input, 0, inputBytes, 0, inputBytes.Length);
+            settingsBuffer = rd.StorageBufferCreate((uint)inputBytes.Length, inputBytes);
+            settingsBufferUniform = new RDUniform
+            {
+                UniformType = RenderingDevice.UniformType.StorageBuffer,
+                Binding = 1,
+            };
+            settingsBufferUniform.AddId(settingsBuffer);
+            inputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> {  inputBuffer.Uniform, settingsBufferUniform,  }, shader, 0);
+        }
 
+        public List<Vector3> GenerateMesh()
+        {
             long computeList = rd.ComputeListBegin();
+            rd.DrawCommandBeginLabel("GeneratePointMesh", new Color(1,0,0,1));
             rd.ComputeListBindComputePipeline(computeList, computePipeline);
             rd.ComputeListBindUniformSet(computeList, inputUniformSet, 0);
             rd.ComputeListBindUniformSet(computeList, ouputUniformSet, 1);
@@ -59,6 +83,8 @@ namespace MarchingCubes
             // Submit to GPU and wait for sync
             rd.Submit();
             rd.Sync();
+
+            rd.DrawCommandEndLabel();
 
             byte[] outputBytes = rd.BufferGetData(settingsBuffer);
             int[] triangleCoutArray = new int[3];
@@ -88,40 +114,6 @@ namespace MarchingCubes
             return vertices;
         }
 
-        private void CreateBuffers(byte[] points, float isolevel)
-        {
-
-            inputBuffer = rd.StorageBufferCreate((uint)points.Length, points);
-            inputBufferUniform = new RDUniform
-            {
-                UniformType = RenderingDevice.UniformType.StorageBuffer,
-                Binding = 0,
-            };
-            inputBufferUniform.AddId(inputBuffer);
-
-
-            float[] input = new float[] {isolevel, 0.0f, (float)ChunkSize};
-            byte[] inputBytes = new byte[input.Length * sizeof(float)];
-            Buffer.BlockCopy(input, 0, inputBytes, 0, inputBytes.Length);
-            settingsBuffer = rd.StorageBufferCreate((uint)inputBytes.Length, inputBytes);
-            settingsBufferUniform = new RDUniform
-            {
-                UniformType = RenderingDevice.UniformType.StorageBuffer,
-                Binding = 1,
-            };
-            settingsBufferUniform.AddId(settingsBuffer);
-            inputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { inputBufferUniform, settingsBufferUniform }, shader, 0);
-
-
-            uint maxTriangleCount = (ChunkSize * ChunkSize * ChunkSize) * 5;
-            outputBuffer = rd.StorageBufferCreate((sizeof(float) * 3) * maxTriangleCount);
-            ouputBufferUniform = new RDUniform
-            {
-                UniformType = RenderingDevice.UniformType.StorageBuffer,
-                Binding = 0
-            };
-            ouputBufferUniform.AddId(outputBuffer);
-            ouputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { ouputBufferUniform }, shader, 1);
-        }
+       
     }
 }

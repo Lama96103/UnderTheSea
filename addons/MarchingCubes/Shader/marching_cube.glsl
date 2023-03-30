@@ -23,6 +23,8 @@ layout(set = 0, binding = 1, std430) restrict buffer SettingData {
 input_setting_buffer;
 
 
+
+
 layout(set = 1, binding = 0, std430) restrict buffer OutputData {
     Triangle triangles[];
 }

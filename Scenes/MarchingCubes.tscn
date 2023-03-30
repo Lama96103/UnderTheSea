@@ -1,7 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bwx7p876ksb3g"]
+[gd_scene load_steps=4 format=3 uid="uid://3xq48oufade2"]
 
 [ext_resource type="Script" path="res://Scripts/DebugCamera.cs" id="1_rldcw"]
-[ext_resource type="Script" path="res://MarchingCubes/MarchingCubesGenerater.cs" id="2_5tc1l"]
+[ext_resource type="Script" path="res://addons/MarchingCubes/MarchingCubesController.cs" id="2_5tc1l"]
 [ext_resource type="Script" path="res://Scripts/NoiseUI.cs" id="3_2in48"]
 
 [node name="Root" type="Node3D"]

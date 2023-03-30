@@ -13,7 +13,7 @@ layout(set = 0, binding = 0, std430) restrict buffer InputBufferData {
 }
 noise_input_data;
 
-layout(set = 0, binding = 1, std430) restrict buffer NoiseBufferData {
+layout(set = 1, binding = 0, std430) restrict buffer NoiseBufferData {
     vec4 point[];
 }
 noise_buffer_data;
