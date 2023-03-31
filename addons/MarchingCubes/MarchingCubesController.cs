@@ -15,7 +15,8 @@ namespace MarchingCubes
 		private PointMeshGenerator meshGen = null;
 
 
-		public float NoiseScale = 0.05f;
+		[Export] private Vector3 noiseOffset;
+		public float NoiseScale = 1;
 		public int Octaves = 4;
 		public float Persistence = 0.5f;
 
@@ -27,6 +28,9 @@ namespace MarchingCubes
         // Called when the node enters the scene tree for the first time.
         public override void _Ready()
         {	
+			GD.Randomize();
+			// noiseOffset = new Vector3(GD.Randf() * 100, GD.Randf() * 100,GD.Randf() * 100);
+			noiseOffset = Vector3.Zero;
             this.CallDeferred("Init");
         }
 
@@ -55,7 +59,7 @@ namespace MarchingCubes
             if(createNoise)
             {
 				Stopwatch watchNoise = Stopwatch.StartNew(); 
-                noiseGen.UpdateSettings(position, NoiseScale, Octaves, Persistence);
+                noiseGen.UpdateSettings(position, noiseOffset, NoiseScale, Octaves, Persistence);
                 currentData =  noiseGen.Generate();
 				pointData[position] = currentData;
 				watchNoise.Stop();

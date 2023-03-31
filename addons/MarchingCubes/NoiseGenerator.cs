@@ -67,7 +67,7 @@ namespace MarchingCubes
             computePipeline = rd.ComputePipelineCreate(shader, new Godot.Collections.Array<RDPipelineSpecializationConstant> {chunkSizeConstant});
         }
 
-        public void UpdateSettings(Vector3 rootPos, float noiseScale, int octaves, float persistence)
+        public void UpdateSettings(Vector3 rootPos, Vector3 offset, float noiseScale, int octaves, float persistence)
         {
             noiseSettings = new InputNoiseBufferData
             {
@@ -83,7 +83,8 @@ namespace MarchingCubes
         {
 
             byte[] data = noiseSettings.GetBytes();
-            Error err = rd.BufferUpdate(inputBuffer, 0, InputNoiseBufferData.GetSize(), data);
+            Error err = rd.BufferUpdate(inputBuffer, 0, (uint)data.Length, data);
+            GD.Print("Update buffer " + data.Length + " bytes: " + err);
 
             long computeList = rd.ComputeListBegin();
             rd.ComputeListBindComputePipeline(computeList, computePipeline);
@@ -127,15 +128,16 @@ namespace MarchingCubes
         private class InputNoiseBufferData
         {
             public Vector3 rootPos = Vector3.Zero;
+
             public float noiseScale = 0.5f;
             public float persistence = 0.5f;
             public int octaves = 4;
 
 
 
+
             public byte[] GetBytes()
             {
-                
                 float[] dataFloat = new float[] {rootPos.X, rootPos.Y, rootPos.Z, noiseScale, persistence};
                 int[] dataInt = new int[] {octaves};
 
@@ -151,7 +153,10 @@ namespace MarchingCubes
 
             public static uint GetSize()
             {
-                return (sizeof(float) * + 5 + sizeof(int));
+                int countInts = 1;
+                int countFloats = 2;
+                int countVec3 = 1;
+                return (uint)((sizeof(float) * 3 * countVec3) + (sizeof(float) * countFloats) + (sizeof(int) * countInts));
             }
         }
     }

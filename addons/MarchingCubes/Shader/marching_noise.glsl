@@ -28,14 +28,16 @@ int indexFromCoord(int x, int y, int z)
 float CaculateNoise(vec3 pos, float persistence, float scale, float low, float high, int octaves)
 {
     // Calc
+    float height = pos.y / float(CHUNK_SIZE); 
+
     float maxAmp = 0;
     float amp = 1;
-    float freq = scale;
+    float freq = scale / 100;
     float noise = 0;
 
     for(int i = 0; i < octaves; i++)
     {
-        noise += snoise(pos * freq) * amp;
+        noise += snoise(pos * freq) * amp ;
         maxAmp += amp;
         amp *= persistence;
         freq *= 2;
@@ -43,6 +45,8 @@ float CaculateNoise(vec3 pos, float persistence, float scale, float low, float h
 
     noise /= maxAmp;
 
+    noise *= height;
+    
     noise = noise * (high - low) / 2 + (high + low) / 2;
     return noise;
 }
