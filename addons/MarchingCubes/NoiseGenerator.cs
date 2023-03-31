@@ -40,11 +40,10 @@ namespace MarchingCubes
             // Load GLSL shader
             RDShaderFile shaderFile = GD.Load<RDShaderFile>("res://addons/MarchingCubes/Shader/marching_noise.glsl");
             RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
-            shader = rd.ShaderCreateFromSpirV(shaderBytecode);
+            shader = rd.ShaderCreateFromSpirV(shaderBytecode, "marching_noise");
 
 
-            InputNoiseBufferData data = new InputNoiseBufferData();
-            inputBuffer = rd.StorageBufferCreate(InputNoiseBufferData.GetSize(), data.GetBytes());
+            inputBuffer = rd.StorageBufferCreate(InputNoiseBufferData.GetSize());
             RDUniform inputBufferUniform = new RDUniform
             {
                 UniformType = RenderingDevice.UniformType.StorageBuffer,
@@ -52,60 +51,58 @@ namespace MarchingCubes
             };
             inputBufferUniform.AddId(inputBuffer);
 
-            uint resultBufferSize = (sizeof(float) * 4) * (uint)(ChunkSize * ChunkSize * ChunkSize);
+            uint resultBufferSize = (sizeof(float) * 4) * ChunkSize * ChunkSize * ChunkSize;
             currentDataBuffer = new PointsDataBuffer(rd, resultBufferSize);
 
 
             inputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { inputBufferUniform }, shader, 0);
             outputUniformSet = rd.UniformSetCreate(new Godot.Collections.Array<RDUniform> { currentDataBuffer.Uniform }, shader, 1);
-            GD.Print("Input uniform " + inputUniformSet.IsValid);
-            GD.Print("Output uniform " + outputUniformSet.IsValid);
+
+            RDPipelineSpecializationConstant chunkSizeConstant = new RDPipelineSpecializationConstant();
+            chunkSizeConstant.ConstantId = 0;
+            chunkSizeConstant.Value = (int)ChunkSize;
             
 
             // Create a compute pipeline
-            computePipeline = rd.ComputePipelineCreate(shader);
-            GD.Print("Pipeline is valied = " + computePipeline.IsValid);
+            computePipeline = rd.ComputePipelineCreate(shader, new Godot.Collections.Array<RDPipelineSpecializationConstant> {chunkSizeConstant});
         }
 
-        public void UpdateSettings(Vector3 rootPos, float noiseScale, int octaves, float persistence, float lacunarity)
+        public void UpdateSettings(Vector3 rootPos, float noiseScale, int octaves, float persistence)
         {
             noiseSettings = new InputNoiseBufferData
             {
                 rootPos = rootPos,
                 noiseScale = noiseScale,
                 octaves = octaves,
-                persistence = persistence,
-                lacunarity = lacunarity,
-                chunkSize = (int)ChunkSize
+                persistence = persistence
             };
         }
 
 
-        public PointsDataBuffer Generate()
+        public List<Vector4> Generate()
         {
+
+            byte[] data = noiseSettings.GetBytes();
+            Error err = rd.BufferUpdate(inputBuffer, 0, InputNoiseBufferData.GetSize(), data);
+
             long computeList = rd.ComputeListBegin();
-
-            Stopwatch sp = Stopwatch.StartNew();
-            //Error err = rd.BufferUpdate(inputBuffer, 0, InputNoiseBufferData.GetSize(), noiseSettings.GetBytes());
-            //GD.Print("Updated input buffer " + err + " -> took " + sp.ElapsedMilliseconds + " ms");
-            sp.Restart();
-
             rd.ComputeListBindComputePipeline(computeList, computePipeline);
             rd.ComputeListBindUniformSet(computeList, inputUniformSet, 0);
             rd.ComputeListBindUniformSet(computeList, outputUniformSet, 1);
             rd.ComputeListDispatch(computeList, xGroups: (uint)ChunkSize, yGroups: (uint)ChunkSize, zGroups: (uint)ChunkSize);
             rd.ComputeListEnd();
+
             
+            Stopwatch sp = Stopwatch.StartNew();
 
             // Submit to GPU and wait for sync
             rd.Submit();
             rd.Sync();
 
-
             GD.Print("Executed compute shader in " + sp.ElapsedMilliseconds + " ms");
             sp.Restart();
             
-            /*
+            
             // Read back the data from the buffers
             byte[] outputBytes = rd.BufferGetData(currentDataBuffer.Buffer);
             GD.Print("Got data in  " + sp.ElapsedMilliseconds);
@@ -114,44 +111,47 @@ namespace MarchingCubes
             float[] output = new float[ChunkSize * ChunkSize * ChunkSize * 4];
             Buffer.BlockCopy(outputBytes, 0, output, 0, outputBytes.Length);
 
-            float minVal = 0.5f;
-            float maxVal = 0.5f;
             List<Vector4> points = new List<Vector4>((int)(ChunkSize * ChunkSize * ChunkSize));
             for(int i = 0; i < output.Length ; i+=4)
             {
                 Vector4 point = new Vector4(output[i+0], output[i+1], output[i+2], output[i+3]);
-                if(point.W > maxVal) maxVal = point.W;
-                if(point.W < minVal) minVal = point.W;
                 points.Add(point);
             }
+            
+            
 
-            GD.Print("Min " + minVal);
-            GD.Print("Max " + maxVal);
-            */
-
-            return currentDataBuffer;
+            return points;
         }
 
+        [Serializable]
         private class InputNoiseBufferData
         {
             public Vector3 rootPos = Vector3.Zero;
             public float noiseScale = 0.5f;
-            public int octaves = 4;
             public float persistence = 0.5f;
-            public float lacunarity = 2f;
-            public int chunkSize = 16;
+            public int octaves = 4;
+
+
 
             public byte[] GetBytes()
             {
-                float[] data = new float[] {rootPos.X, rootPos.Y, rootPos.Z, noiseScale, (float)octaves, persistence, lacunarity, (float)chunkSize};
-                byte[] dataBytes = new byte[data.Length * sizeof(float)];
-                Buffer.BlockCopy(data, 0, dataBytes, 0, dataBytes.Length);
+                
+                float[] dataFloat = new float[] {rootPos.X, rootPos.Y, rootPos.Z, noiseScale, persistence};
+                int[] dataInt = new int[] {octaves};
+
+                int sizeFloatByte = dataFloat.Length * sizeof(float);
+                int sizeIntByte = dataInt.Length * sizeof(int);
+
+                byte[] dataBytes = new byte[sizeFloatByte + sizeIntByte];
+
+                Buffer.BlockCopy(dataFloat, 0, dataBytes, 0, sizeFloatByte);
+                Buffer.BlockCopy(dataInt, 0, dataBytes, sizeFloatByte, sizeIntByte);
                 return dataBytes;
             }
 
             public static uint GetSize()
             {
-                return (sizeof(float) * 8);
+                return (sizeof(float) * + 5 + sizeof(int));
             }
         }
     }

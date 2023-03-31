@@ -39,8 +39,12 @@ namespace MarchingCubes
             RDShaderSpirV shaderBytecode = shaderFile.GetSpirV();
             shader = rd.ShaderCreateFromSpirV(shaderBytecode);
 
+            RDPipelineSpecializationConstant chunkSizeConstant = new RDPipelineSpecializationConstant();
+            chunkSizeConstant.ConstantId = 0;
+            chunkSizeConstant.Value = (int)ChunkSize;
+
             // Create a compute pipeline
-            computePipeline = rd.ComputePipelineCreate(shader);
+            computePipeline = rd.ComputePipelineCreate(shader, new Godot.Collections.Array<RDPipelineSpecializationConstant> {chunkSizeConstant});
 
             uint maxTriangleCount = (ChunkSize * ChunkSize * ChunkSize) * 5;
             outputBuffer = rd.StorageBufferCreate((sizeof(float) * 3) * maxTriangleCount);
@@ -57,7 +61,7 @@ namespace MarchingCubes
 
         public void Update(PointsDataBuffer inputBuffer, float isolevel)
         {
-            float[] input = new float[] {isolevel, 0.0f, (int)ChunkSize};
+            float[] input = new float[] {isolevel, 0.0f};
             byte[] inputBytes = new byte[input.Length * sizeof(float)];
             Buffer.BlockCopy(input, 0, inputBytes, 0, inputBytes.Length);
             settingsBuffer = rd.StorageBufferCreate((uint)inputBytes.Length, inputBytes);
@@ -87,7 +91,7 @@ namespace MarchingCubes
             rd.DrawCommandEndLabel();
 
             byte[] outputBytes = rd.BufferGetData(settingsBuffer);
-            int[] triangleCoutArray = new int[3];
+            int[] triangleCoutArray = new int[2];
             Buffer.BlockCopy(outputBytes, 0, triangleCoutArray, 0, outputBytes.Length);
 
             int triangleCount = triangleCoutArray[1];

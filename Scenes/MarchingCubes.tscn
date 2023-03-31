@@ -53,7 +53,10 @@ text = "Noise Scale"
 
 [node name="NoiseScaleSlider" type="HSlider" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-step = 0.5
+min_value = 0.01
+max_value = 1.0
+step = 0.01
+value = 0.01
 
 [node name="OctavesText" type="Label" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -61,7 +64,9 @@ text = "Octaves"
 
 [node name="OctavesSlider" type="HSlider" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
+min_value = 1.0
 max_value = 10.0
+value = 1.0
 
 [node name="PersistenceText" type="Label" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -69,17 +74,10 @@ text = "Persistence"
 
 [node name="PersistenceSlider" type="HSlider" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-max_value = 5.0
-step = 0.25
-
-[node name="LacunarityText" type="Label" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Lacunarity"
-
-[node name="LacunaritySlider" type="HSlider" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-max_value = 5.0
-step = 0.25
+min_value = 0.01
+max_value = 1.0
+step = 0.01
+value = 0.01
 
 [node name="Noise Button" type="Button" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -108,7 +106,6 @@ text = "Generate Mesh
 [connection signal="value_changed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/NoiseScaleSlider" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnUpdateNoiseScale"]
 [connection signal="value_changed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/OctavesSlider" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnUpdateOctaves"]
 [connection signal="value_changed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/PersistenceSlider" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnUpdatePersistence"]
-[connection signal="value_changed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/LacunaritySlider" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnUpdateLacunarity"]
 [connection signal="pressed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Noise Button" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnGenerateNoise"]
 [connection signal="value_changed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/SurfaceSlider" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnUpdateSurfaceLevel"]
 [connection signal="pressed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Mesh Button" to="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" method="OnGenerateMap"]

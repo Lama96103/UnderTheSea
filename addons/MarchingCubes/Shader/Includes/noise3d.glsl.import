@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://bkvgspdwa73w5"
+path="res://.godot/imported/noise3d.glsl-de7795d66c781b6b55774e613c5e13ef.res"
+
+[deps]
+
+source_file="res://addons/MarchingCubes/Shader/Includes/noise3d.glsl"
+dest_files=["res://.godot/imported/noise3d.glsl-de7795d66c781b6b55774e613c5e13ef.res"]
+
+[params]
+

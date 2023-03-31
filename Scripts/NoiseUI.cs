@@ -19,11 +19,8 @@ public partial class NoiseUI : VBoxContainer
 		GetNode<Slider>("PersistenceSlider").Value = generator.Persistence;
 		OnUpdatePersistence(generator.Persistence);
 
-		GetNode<Slider>("LacunaritySlider").Value = generator.Lacunarity;
-		OnUpdateLacunarity(generator.Lacunarity);	
-
 		GetNode<Slider>("SurfaceSlider").Value = generator.SurfaceLevel;
-		OnUpdateLacunarity(generator.SurfaceLevel);	
+		OnUpdateSurfaceLevel(generator.SurfaceLevel);	
 		
 		didInitialied = true;
 	}
@@ -50,13 +47,7 @@ public partial class NoiseUI : VBoxContainer
 		generator.Persistence = val;
 		OnGenerateNoise();
 	}
-	public void OnUpdateLacunarity(float val)
-	{
-		GetNode<Label>("LacunarityText").Text = "Lacunarity : " + val.ToString("0.00");
-		if(!didInitialied) return;
-		generator.Lacunarity = val;
-		OnGenerateNoise();
-	}
+
 
 	public void OnUpdateSurfaceLevel(float val)
 	{
@@ -70,11 +61,21 @@ public partial class NoiseUI : VBoxContainer
 	{
 		if(!didInitialied) return;
 		generator.Generate(Vector3.Zero, true);
+
+		generator.Generate(Vector3.Zero + new Vector3(generator.ChunkSize, 0 , 0 ), true);
+		generator.Generate(Vector3.Zero + new Vector3(0, 0 , generator.ChunkSize ), true);
+		generator.Generate(Vector3.Zero + new Vector3(generator.ChunkSize, 0 , generator.ChunkSize ), true);
 	}
 
 	public void OnGenerateMap()
 	{
 		if(!didInitialied) return;
 		generator.Generate(Vector3.Zero, false);
+
+		generator.Generate(Vector3.Zero + new Vector3(generator.ChunkSize, 0 , 0 ), false);
+		generator.Generate(Vector3.Zero + new Vector3(0, 0 , generator.ChunkSize ), false);
+		generator.Generate(Vector3.Zero + new Vector3(generator.ChunkSize, 0 , generator.ChunkSize ), false);
+
+		
 	}
 }

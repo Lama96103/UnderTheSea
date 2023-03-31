@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Under The Sea", "Under The Sea.csproj", "{F70F2C80-4215-483A-AE34-D22CE8254167}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Under The Sea", "Under The Sea.csproj", "{B524C35E-E206-4346-BA01-363F203CE2CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,11 +9,11 @@ Global
 	ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F70F2C80-4215-483A-AE34-D22CE8254167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F70F2C80-4215-483A-AE34-D22CE8254167}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F70F2C80-4215-483A-AE34-D22CE8254167}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{F70F2C80-4215-483A-AE34-D22CE8254167}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{F70F2C80-4215-483A-AE34-D22CE8254167}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{F70F2C80-4215-483A-AE34-D22CE8254167}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{B524C35E-E206-4346-BA01-363F203CE2CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B524C35E-E206-4346-BA01-363F203CE2CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B524C35E-E206-4346-BA01-363F203CE2CE}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{B524C35E-E206-4346-BA01-363F203CE2CE}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{B524C35E-E206-4346-BA01-363F203CE2CE}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{B524C35E-E206-4346-BA01-363F203CE2CE}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
 	EndGlobalSection
 EndGlobal

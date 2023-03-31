@@ -1,15 +1,15 @@
 #[compute]
 #version 450
 
-#include "Includes/noise.glsl"
+#include "Includes/noise3d.glsl"
+
+layout (constant_id = 0) const int CHUNK_SIZE = 4;
 
 layout(set = 0, binding = 0, std430) restrict buffer InputBufferData {
     vec3 rootPos;
-    float noiseScale;
-    int octaves;
+    float scale;
     float persistence;
-    float lacunarity;
-    int chunkSize;
+    int octaves;
 }
 noise_input_data;
 
@@ -21,7 +21,30 @@ noise_buffer_data;
 
 int indexFromCoord(int x, int y, int z) 
 {
-    return z * noise_input_data.chunkSize * noise_input_data.chunkSize + y * noise_input_data.chunkSize + x;
+    return z * CHUNK_SIZE * CHUNK_SIZE + y * CHUNK_SIZE + x;
+}
+
+
+float CaculateNoise(vec3 pos, float persistence, float scale, float low, float high, int octaves)
+{
+    // Calc
+    float maxAmp = 0;
+    float amp = 1;
+    float freq = scale;
+    float noise = 0;
+
+    for(int i = 0; i < octaves; i++)
+    {
+        noise += snoise(pos * freq) * amp;
+        maxAmp += amp;
+        amp *= persistence;
+        freq *= 2;
+    }
+
+    noise /= maxAmp;
+
+    noise = noise * (high - low) / 2 + (high + low) / 2;
+    return noise;
 }
 
 
@@ -33,33 +56,12 @@ void main() {
     
     vec3 pos = noise_input_data.rootPos + gl_GlobalInvocationID.xyz;
     
-    //float finalNoise = perlin(pos);
-
     
-    float frequency = noise_input_data.noiseScale / 100;
-    float amplitude = 1;
-    
-    float weight = 1;
-    float weightMultiplier = 1;
+    // Settings
+    float low = 0;
+    float high = 1;
 
-    float noise = 0;
-    for(int i = 0; i < int(noise_input_data.octaves); i++)
-    {
-        float n = perlin(pos * frequency);
-        float v = 1-abs(n);
-        v = v * v;
-        v *= weight;
-        weight = max(min(v*weightMultiplier,1),0);
+    float noise = CaculateNoise(pos, noise_input_data.persistence, noise_input_data.scale, low, high, noise_input_data.octaves);
 
-        noise += v * amplitude;
-
-        amplitude *= noise_input_data.persistence;
-        frequency *= noise_input_data.lacunarity;
-
-    }
-
-    
-
-
-    noise_buffer_data.point[index] = vec4(pos, noise);
+    noise_buffer_data.point[index] = vec4(gl_GlobalInvocationID.xyz, noise);
 }

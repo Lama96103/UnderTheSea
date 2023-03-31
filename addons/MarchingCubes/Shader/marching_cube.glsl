@@ -2,6 +2,8 @@
 #version 450
 #include "Includes/march_table.glsl"
 
+layout (constant_id = 0) const int CHUNK_SIZE = 4;
+
 struct Triangle
 {
   vec3 vert1;
@@ -18,7 +20,6 @@ input_data_buffer;
 layout(set = 0, binding = 1, std430) restrict buffer SettingData {
     float isolevel;
     int triangleCount;
-    int chunkSize;
 }
 input_setting_buffer;
 
@@ -34,7 +35,7 @@ output_data_buffer;
 
 int indexFromCoord(int x, int y, int z) 
 {
-    return z * input_setting_buffer.chunkSize * input_setting_buffer.chunkSize + y * input_setting_buffer.chunkSize + x;
+    return z * CHUNK_SIZE * CHUNK_SIZE + y * CHUNK_SIZE + x;
 }
 
 
