@@ -84,7 +84,7 @@ namespace MarchingCubes
 
             byte[] data = noiseSettings.GetBytes();
             Error err = rd.BufferUpdate(inputBuffer, 0, (uint)data.Length, data);
-            GD.Print("Update buffer " + data.Length + " bytes: " + err);
+            //GD.Print("Update buffer " + data.Length + " bytes: " + err);
 
             long computeList = rd.ComputeListBegin();
             rd.ComputeListBindComputePipeline(computeList, computePipeline);
@@ -94,19 +94,19 @@ namespace MarchingCubes
             rd.ComputeListEnd();
 
             
-            Stopwatch sp = Stopwatch.StartNew();
+            //Stopwatch sp = Stopwatch.StartNew();
 
             // Submit to GPU and wait for sync
             rd.Submit();
             rd.Sync();
 
-            GD.Print("Executed compute shader in " + sp.ElapsedMilliseconds + " ms");
-            sp.Restart();
+            //GD.Print("Executed compute shader in " + sp.ElapsedMilliseconds + " ms");
+            //sp.Restart();
             
             
             // Read back the data from the buffers
             byte[] outputBytes = rd.BufferGetData(currentDataBuffer.Buffer);
-            GD.Print("Got data in  " + sp.ElapsedMilliseconds);
+            //GD.Print("Got data in  " + sp.ElapsedMilliseconds);
            
             
             float[] output = new float[ChunkSize * ChunkSize * ChunkSize * 4];

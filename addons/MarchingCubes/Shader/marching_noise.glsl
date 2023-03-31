@@ -45,7 +45,7 @@ float CaculateNoise(vec3 pos, float persistence, float scale, float low, float h
 
     noise /= maxAmp;
 
-    noise *= height;
+    //noise *= height;
     
     noise = noise * (high - low) / 2 + (high + low) / 2;
     return noise;

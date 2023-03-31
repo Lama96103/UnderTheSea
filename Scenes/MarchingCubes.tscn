@@ -9,17 +9,20 @@
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 17.42)
 script = ExtResource("1_rldcw")
-Speed = 8.0
+Speed = 16.0
 Sensitivity = 2.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.549825, -0.803407, 0.228538, 0, 0.273607, 0.961842, -0.83528, -0.528845, 0.150436, 2.11536, 0, 0)
 
-[node name="MarchingCubes" type="Node3D" parent="."]
+[node name="MarchingCubes" type="Node3D" parent="." node_paths=PackedStringArray("trackedNode")]
 unique_name_in_owner = true
 script = ExtResource("2_5tc1l")
+NoiseScale = 0.5
+trackedNode = NodePath("../Camera3D")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

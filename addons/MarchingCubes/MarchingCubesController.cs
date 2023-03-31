@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace MarchingCubes
 {
@@ -15,15 +16,20 @@ namespace MarchingCubes
 		private PointMeshGenerator meshGen = null;
 
 
-		[Export] private Vector3 noiseOffset;
-		public float NoiseScale = 1;
-		public int Octaves = 4;
-		public float Persistence = 0.5f;
+		private Vector3 noiseOffset;
+		[Export] public float NoiseScale = 1;
+		[Export] public int Octaves = 4;
+		[Export] public float Persistence = 0.5f;
 
 		private RenderingDevice renderingDevice;
 
 		private Dictionary<Vector3, List<Vector4>> pointData = new Dictionary<Vector3, List<Vector4>>();
 		private Dictionary<Vector3, MeshInstance3D> meshData = new Dictionary<Vector3, MeshInstance3D>();
+
+		[Export] private Node3D trackedNode;
+		private Vector3 currentMeshInstace = Vector3.Zero;
+
+		private List<Tuple<Vector3,bool>> chunksToGenerate = new List<Tuple<Vector3,bool>>();
 
         // Called when the node enters the scene tree for the first time.
         public override void _Ready()
@@ -45,25 +51,103 @@ namespace MarchingCubes
 			meshGen.Init(renderingDevice, chunkSize);
 
             Generate(Vector3.Zero, true);
+
+			Task.Run(() => {
+
+				while(true)
+				{
+					if(chunksToGenerate.Count == 0) 
+					{
+						System.Threading.Thread.Sleep(100);
+						continue;
+					}
+					ProcessChunkQueue();
+				}
+
+			});
         }
+
+		private double deltaTime = 0;
+
+		public override void _Process(double delta)
+		{	
+			deltaTime += delta;
+			if(deltaTime < 1) return;
+			deltaTime = 0;
+
+			// Check for new mainmesh isntance
+			Vector3 trackedNodePosition = trackedNode.GlobalPosition;
+			float minDistance = float.MaxValue;
+			Vector3 nearestPoint = Vector3.Zero;
+
+			for(int x = -5; x <= 5; x++)
+			for(int y = -5; y <= 5; y++)
+			for(int z = -5; z <= 5; z++)
+			{
+				Vector3 pos = currentMeshInstace + new Vector3(ChunkSize * x, ChunkSize * y, ChunkSize * z);
+				nearestPoint = CheckDistance(trackedNodePosition, pos, ref minDistance, nearestPoint);
+			
+				if(meshData.ContainsKey(pos)) continue;
+				Generate(pos, !pointData.ContainsKey(pos));
+			}
+
+			currentMeshInstace = nearestPoint;
+			
+			GD.Print("Nearest point = " + currentMeshInstace);
+
+		}
+
+		private Vector3 CheckDistance(Vector3 origin, Vector3 destination, ref float minDistance, Vector3 last)
+		{
+			float distance = origin.DistanceTo(destination);
+			if(distance < minDistance)
+			{
+				minDistance = distance;
+				return destination;
+			}
+			return last;
+		}
 
         
 
         public void Generate(Vector3 position, bool createNoise)
         {
-			GD.Print("Generating chunk " + position);
+			lock(chunksToGenerate)
+			{
+				foreach(var item in chunksToGenerate) if(item.Item1 == position) return;
+				chunksToGenerate.Add(new Tuple<Vector3, bool>(position, createNoise));
+			}
+
+        }
+
+		private void ProcessChunkQueue()
+		{
+
+			Tuple<Vector3, bool> item = null;
+			lock(chunksToGenerate)
+			{
+				item = chunksToGenerate[0];
+				chunksToGenerate.RemoveAt(0);
+			}
+
+			Stopwatch chunkGenWatch = Stopwatch.StartNew();
+
+			Vector3 position = item.Item1;
+			bool createNoise = item.Item2;
+
+			// GD.Print("Generating chunk " + position);
 			List<Vector4> currentData = null;
 			if(!pointData.ContainsKey(position)) pointData.Add(position, null);
 			if(!meshData.ContainsKey(position)) meshData.Add(position, null);
 
             if(createNoise)
             {
-				Stopwatch watchNoise = Stopwatch.StartNew(); 
+				//Stopwatch watchNoise = Stopwatch.StartNew(); 
                 noiseGen.UpdateSettings(position, noiseOffset, NoiseScale, Octaves, Persistence);
                 currentData =  noiseGen.Generate();
 				pointData[position] = currentData;
-				watchNoise.Stop();
-				GD.Print("Took " + watchNoise.ElapsedMilliseconds + " ms to generate noise.");
+				//watchNoise.Stop();
+				//GD.Print("Took " + watchNoise.ElapsedMilliseconds + " ms to generate noise.");
             }
 			else
 			{
@@ -76,20 +160,25 @@ namespace MarchingCubes
 				return;
 			}
            
-			Stopwatch watchVertex = Stopwatch.StartNew(); 
+			//Stopwatch watchVertex = Stopwatch.StartNew(); 
             //meshGen.Update(data, SurfaceLevel);
             //List<Vector3> vertiecs = meshGen.GenerateMesh();
             List<Vector3> vertices = GenerateVertices(currentData);
 
-			watchVertex.Stop();
-			GD.Print("Took " + watchVertex.ElapsedMilliseconds + " ms to generate verts.");
+			//watchVertex.Stop();
+			//GD.Print("Took " + watchVertex.ElapsedMilliseconds + " ms to generate verts.");
 
 
-			Stopwatch watchMesh = Stopwatch.StartNew(); 
+			//Stopwatch watchMesh = Stopwatch.StartNew(); 
             GenerateMesh(position, vertices);
-			watchMesh.Stop();
-			GD.Print("Took " + watchMesh.ElapsedMilliseconds + " ms to generate mesh.");
-        }
+			//watchMesh.Stop();
+			//GD.Print("Took " + watchMesh.ElapsedMilliseconds + " ms to generate mesh.");
+
+			chunkGenWatch.Stop();
+			GD.Print("Took " + chunkGenWatch.ElapsedMilliseconds + " ms to generate chunk " + position);
+
+
+		}
 
         private int IndexFromCoords(int x, int y, int z) 
 		{
@@ -199,18 +288,18 @@ namespace MarchingCubes
 				tool.AddVertex(v);
 			}
 
-			Stopwatch sp = Stopwatch.StartNew();
-            //tool.Index();
+			//Stopwatch sp = Stopwatch.StartNew();
+            tool.Index();
             tool.GenerateNormals();
             // tool.GenerateTangents();
             tool.Commit(mesh);
-            sp.Stop();
-            GD.Print("Took " + sp.Elapsed.TotalMilliseconds + " ms to optimize mesh");
+            //sp.Stop();
+            //GD.Print("Took " + sp.Elapsed.TotalMilliseconds + " ms to optimize mesh");
 
             MeshInstance3D meshInstance3D = new MeshInstance3D();
 			meshInstance3D.Name = "Chunk " + rootPos;
             meshInstance3D.Mesh = mesh;
-            this.AddChild(meshInstance3D);
+			this.CallDeferred("add_child", meshInstance3D);
 			meshInstance3D.Position = rootPos;
 			meshData[rootPos] = meshInstance3D;
 		}
