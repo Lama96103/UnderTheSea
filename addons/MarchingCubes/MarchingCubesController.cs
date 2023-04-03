@@ -80,9 +80,10 @@ namespace MarchingCubes
 			float minDistance = float.MaxValue;
 			Vector3 nearestPoint = Vector3.Zero;
 
-			for(int x = -5; x <= 5; x++)
-			for(int y = -5; y <= 5; y++)
-			for(int z = -5; z <= 5; z++)
+			int checkDistance = 2;
+			for(int x = -checkDistance; x <= checkDistance; x++)
+			for(int y = -checkDistance; y <= checkDistance; y++)
+			for(int z = -checkDistance; z <= checkDistance; z++)
 			{
 				Vector3 pos = currentMeshInstace + new Vector3(ChunkSize * x, ChunkSize * y, ChunkSize * z);
 				nearestPoint = CheckDistance(trackedNodePosition, pos, ref minDistance, nearestPoint);

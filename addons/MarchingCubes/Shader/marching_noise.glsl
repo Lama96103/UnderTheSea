@@ -25,7 +25,7 @@ int indexFromCoord(int x, int y, int z)
 }
 
 
-float CaculateNoise(vec3 pos, float persistence, float scale, float low, float high, int octaves)
+float CaculateNoise(vec3 pos, float persistence, float scale, int octaves)
 {
     // Calc
     float height = pos.y / float(CHUNK_SIZE); 
@@ -46,6 +46,9 @@ float CaculateNoise(vec3 pos, float persistence, float scale, float low, float h
     noise /= maxAmp;
 
     //noise *= height;
+
+    float high = 1;
+    float low = 0;
     
     noise = noise * (high - low) / 2 + (high + low) / 2;
     return noise;
@@ -59,13 +62,32 @@ void main() {
 
     
     vec3 pos = noise_input_data.rootPos + gl_GlobalInvocationID.xyz;
-    
-    
-    // Settings
-    float low = 0;
-    float high = 1;
 
-    float noise = CaculateNoise(pos, noise_input_data.persistence, noise_input_data.scale, low, high, noise_input_data.octaves);
 
-    noise_buffer_data.point[index] = vec4(gl_GlobalInvocationID.xyz, noise);
+    float noise = CaculateNoise(pos, noise_input_data.persistence, noise_input_data.scale, noise_input_data.octaves);
+
+    float seaLevel = -100;
+    float seaLevelWeigth = 1;
+    float floorLevel = -200;
+    float floorWeight = 0;
+
+    if(pos.y >= seaLevel)
+    {
+        seaLevelWeigth = 0;
+    }
+    else if(pos.y >= seaLevel - 5)
+    {
+        float x = (abs(pos.y - seaLevel) / 10);
+        seaLevelWeigth = mix(0,1, x);
+    }
+
+    if(pos.y <= floorLevel)
+    {
+        floorWeight = 1;
+    }
+
+
+    float finalNoise = noise * seaLevelWeigth + floorWeight;
+
+    noise_buffer_data.point[index] = vec4(gl_GlobalInvocationID.xyz, finalNoise);
 }

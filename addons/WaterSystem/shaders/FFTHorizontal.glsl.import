@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://cc4s8jhgy5u3i"
+path="res://.godot/imported/FFTHorizontal.glsl-49f41b4a6997037324308dd408f85f92.res"
+
+[deps]
+
+source_file="res://addons/WaterSystem/shaders/FFTHorizontal.glsl"
+dest_files=["res://.godot/imported/FFTHorizontal.glsl-49f41b4a6997037324308dd408f85f92.res"]
+
+[params]
+
