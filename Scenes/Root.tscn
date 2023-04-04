@@ -1,11 +1,14 @@
-[gd_scene load_steps=11 format=3 uid="uid://blj0kq8voxv1g"]
+[gd_scene load_steps=15 format=3 uid="uid://blj0kq8voxv1g"]
 
 [ext_resource type="Script" path="res://Scripts/DebugCamera.cs" id="1_ilr4a"]
 [ext_resource type="PackedScene" path="res://addons/MarchingCubes/MarchingCubes.tscn" id="2_spxkd"]
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="3_t7ect"]
-[ext_resource type="Script" path="res://addons/WaterSystem/components/QuadTree.cs" id="3_yuqs4"]
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="4_aigix"]
-[ext_resource type="Shader" path="res://addons/WaterSystem/shaders/SurfaceVisual.gdshader" id="5_krynr"]
+[ext_resource type="Script" path="res://addons/WaterSystem/components/Ocean.cs" id="3_yj8kt"]
+[ext_resource type="Shader" path="res://addons/WaterSystem/shaders_gerstner/Gerstner.gdshader" id="4_3pitj"]
+[ext_resource type="CompressedTexture2DArray" uid="uid://dcvujep4v7k1b" path="res://realistic_water_shader/art/water/Caustic.png" id="5_ht21r"]
+[ext_resource type="Texture2D" uid="uid://bnbsbssh473o0" path="res://realistic_water_shader/art/water/Foam.png" id="6_v58qn"]
+[ext_resource type="Texture2D" uid="uid://bfa4xeh5thwio" path="res://realistic_water_shader/art/water/Water_N_A.png" id="7_id1cq"]
+[ext_resource type="Texture2D" uid="uid://dpwv0qf6tb7we" path="res://realistic_water_shader/art/water/Water_N_B.png" id="8_u7t3g"]
+[ext_resource type="Texture2D" uid="uid://ch1eb1v8e4utn" path="res://realistic_water_shader/art/water/Water_UV.png" id="9_arwmk"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_16ckx"]
 
@@ -16,51 +19,39 @@ sky_material = SubResource("ProceduralSkyMaterial_16ckx")
 background_mode = 2
 sky = SubResource("Sky_8517m")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_g3qkw"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_i880s"]
 render_priority = 0
-shader = ExtResource("5_krynr")
-shader_parameter/specular_strength = 1.0
-shader_parameter/specular_power = 1500.0
-shader_parameter/view_fade_start = 0.95
-shader_parameter/deep_color = Color(0.004, 0.016, 0.047, 1)
-shader_parameter/shallow_color = Color(0, 0.729412, 0.988235, 1)
-shader_parameter/fresnel_offset = 0.02
-shader_parameter/fresnel_strength = 0.0
-shader_parameter/fresnel_power = 5.0
-shader_parameter/fresnel_exposure = 0.03
-shader_parameter/fresnel_sky_color = Color(1.6, 4.8, 6.4, 1)
-shader_parameter/normal_factor = 1.0
-shader_parameter/cascade_uv_scales = null
-shader_parameter/uv_scale = 0.00195312
-shader_parameter/wind_uv_offset = Vector2(0, 0)
-shader_parameter/view_distance_max = 16000.0
-shader_parameter/vertex_resolution = 256.0
-shader_parameter/cascade_displacements = null
-shader_parameter/domain_warp_uv_scale = 6.25e-05
-shader_parameter/domain_warp_strength = 1500.0
-shader_parameter/planetary_curve_strength = 1e-06
-shader_parameter/amplitude_scale_min = 0.25
-shader_parameter/amplitude_scale_max = 1.0
-shader_parameter/amplitude_scale_fade_distance = 12000.0
-shader_parameter/pbr_specular_strength = 0.1
-shader_parameter/pbr_specular_offset = 0.1
-shader_parameter/pbr_metallic_strength = 0.0
-shader_parameter/refraction_factor_min = 0.0
-shader_parameter/refraction_factor_max = 0.025
-shader_parameter/refraction_distance_power = 1.55
-shader_parameter/refraction_distance_max = 30000.0
-shader_parameter/refraction_background_brightness = 0.2
-shader_parameter/refraction_depth_factor = 1e-05
-shader_parameter/sss_backlight_strength = 0.0125
-shader_parameter/sss_backlight_fov = 10.0
-shader_parameter/sss_backlight_depth = 15.0
-shader_parameter/sss_upwelling = 0.075
-shader_parameter/sss_color = Color(0, 0.729412, 0.988235, 1)
-shader_parameter/foam_jacobian_limit = 0.5
-shader_parameter/foam_coverage = 0.1
-shader_parameter/foam_mix_strength = 1.0
-shader_parameter/foam_diffuse_strength = 1.0
-shader_parameter/foam_diffuse_color = Color(0.917647, 0.968627, 1, 1)
+shader = ExtResource("4_3pitj")
+shader_parameter/sampler_scale = Vector2(0.25, 0.25)
+shader_parameter/sampler_direction = Vector2(0.05, 0.04)
+shader_parameter/uv_sampler_scale = Vector2(0.25, 0.25)
+shader_parameter/uv_sampler_strength = 0.04
+shader_parameter/refraction = 0.075
+shader_parameter/color_deep = Color(0.027451, 0.168627, 0.345098, 1)
+shader_parameter/color_shallow = Color(0.0156863, 0.180392, 0.529412, 1)
+shader_parameter/beers_law = 2.0
+shader_parameter/depth_offset = -0.75
+shader_parameter/uv_sampler = ExtResource("9_arwmk")
+shader_parameter/normalmap_a_sampler = ExtResource("7_id1cq")
+shader_parameter/normalmap_b_sampler = ExtResource("8_u7t3g")
+shader_parameter/foam_sampler = ExtResource("6_v58qn")
+shader_parameter/caustic_sampler = ExtResource("5_ht21r")
+shader_parameter/directionWave1 = Vector2(1, 0)
+shader_parameter/amplitudeWave1 = 0.592
+shader_parameter/steepnessWave1 = 0.195
+shader_parameter/frequencyWave1 = 0.401
+shader_parameter/speedWave1 = 1.0
+shader_parameter/directionWave2 = Vector2(0, 1)
+shader_parameter/amplitudeWave2 = 0.387
+shader_parameter/steepnessWave2 = 0.442
+shader_parameter/frequencyWave2 = 0.858
+shader_parameter/speedWave2 = 0.216
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_x23f0"]
+material = SubResource("ShaderMaterial_i880s")
+size = Vector2(50, 50)
+subdivide_width = 100
+subdivide_depth = 100
 
 [node name="Root" type="WorldEnvironment"]
 environment = SubResource("Environment_fcb2o")
@@ -92,16 +83,11 @@ shadow_enabled = true
 
 [node name="MarchingCubes" parent="." node_paths=PackedStringArray("trackedNode") instance=ExtResource("2_spxkd")]
 process_mode = 4
-NoiseScale = 0.25
-Octaves = 5
 trackedNode = NodePath("../Camera3D")
 
-[node name="QuadTree" type="Node3D" parent="."]
-script = ExtResource("3_yuqs4")
+[node name="Ocean" type="Node3D" parent="."]
+script = ExtResource("3_yj8kt")
 
-[node name="Ocean3D" type="Node3D" parent="."]
-script = ExtResource("3_t7ect")
-
-[node name="QuadTree3D" type="Node3D" parent="."]
-script = ExtResource("4_aigix")
-material = SubResource("ShaderMaterial_g3qkw")
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ocean"]
+mesh = SubResource("PlaneMesh_x23f0")
+skeleton = NodePath("../..")
