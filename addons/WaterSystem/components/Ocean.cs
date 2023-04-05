@@ -3,17 +3,28 @@ using Godot;
 
 namespace WaterSystem
 {
+    [Tool]
     public partial class Ocean : Node3D
     {
         [Export] private System WaveSystem = System.Gerstner;
+        [Export] private WaveSetting[] Waves = new WaveSetting[0];
 
 
-        [Flags]
+
+
+        public override void _Ready()
+        {
+            
+        }
+
+
+
         public enum System
         {
-            None,
             Gerstner ,
             FFT
         }
+
+    
     }
 }

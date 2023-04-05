@@ -4,11 +4,7 @@
 [ext_resource type="PackedScene" path="res://addons/MarchingCubes/MarchingCubes.tscn" id="2_spxkd"]
 [ext_resource type="Script" path="res://addons/WaterSystem/components/Ocean.cs" id="3_yj8kt"]
 [ext_resource type="Shader" path="res://addons/WaterSystem/shaders_gerstner/Gerstner.gdshader" id="4_3pitj"]
-[ext_resource type="CompressedTexture2DArray" uid="uid://dcvujep4v7k1b" path="res://realistic_water_shader/art/water/Caustic.png" id="5_ht21r"]
-[ext_resource type="Texture2D" uid="uid://bnbsbssh473o0" path="res://realistic_water_shader/art/water/Foam.png" id="6_v58qn"]
-[ext_resource type="Texture2D" uid="uid://bfa4xeh5thwio" path="res://realistic_water_shader/art/water/Water_N_A.png" id="7_id1cq"]
-[ext_resource type="Texture2D" uid="uid://dpwv0qf6tb7we" path="res://realistic_water_shader/art/water/Water_N_B.png" id="8_u7t3g"]
-[ext_resource type="Texture2D" uid="uid://ch1eb1v8e4utn" path="res://realistic_water_shader/art/water/Water_UV.png" id="9_arwmk"]
+[ext_resource type="Resource" uid="uid://cb05yxjibb5p2" path="res://addons/WaterSystem/Waves/Wave1.tres" id="4_r43mp"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_16ckx"]
 
@@ -19,33 +15,57 @@ sky_material = SubResource("ProceduralSkyMaterial_16ckx")
 background_mode = 2
 sky = SubResource("Sky_8517m")
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_nyw4m"]
+noise_type = 3
+seed = 136
+frequency = 0.011
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_nexib"]
+width = 1024
+height = 1024
+in_3d_space = true
+seamless = true
+as_normal_map = true
+noise = SubResource("FastNoiseLite_nyw4m")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fcj0v"]
+frequency = 0.027
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ul4yr"]
+width = 1024
+height = 1024
+in_3d_space = true
+seamless = true
+as_normal_map = true
+noise = SubResource("FastNoiseLite_fcj0v")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i880s"]
 render_priority = 0
 shader = ExtResource("4_3pitj")
-shader_parameter/sampler_scale = Vector2(0.25, 0.25)
-shader_parameter/sampler_direction = Vector2(0.05, 0.04)
-shader_parameter/uv_sampler_scale = Vector2(0.25, 0.25)
-shader_parameter/uv_sampler_strength = 0.04
-shader_parameter/refraction = 0.075
 shader_parameter/color_deep = Color(0.027451, 0.168627, 0.345098, 1)
 shader_parameter/color_shallow = Color(0.0156863, 0.180392, 0.529412, 1)
 shader_parameter/beers_law = 2.0
 shader_parameter/depth_offset = -0.75
-shader_parameter/uv_sampler = ExtResource("9_arwmk")
-shader_parameter/normalmap_a_sampler = ExtResource("7_id1cq")
-shader_parameter/normalmap_b_sampler = ExtResource("8_u7t3g")
-shader_parameter/foam_sampler = ExtResource("6_v58qn")
-shader_parameter/caustic_sampler = ExtResource("5_ht21r")
+shader_parameter/metallic = 0.0
+shader_parameter/roughness = 0.074
+shader_parameter/texture_normal1 = SubResource("NoiseTexture2D_nexib")
+shader_parameter/texture_normal2 = SubResource("NoiseTexture2D_ul4yr")
 shader_parameter/directionWave1 = Vector2(1, 0)
-shader_parameter/amplitudeWave1 = 0.592
-shader_parameter/steepnessWave1 = 0.195
-shader_parameter/frequencyWave1 = 0.401
+shader_parameter/amplitudeWave1 = 1.233
+shader_parameter/steepnessWave1 = 0.627
+shader_parameter/frequencyWave1 = 0.464
 shader_parameter/speedWave1 = 1.0
-shader_parameter/directionWave2 = Vector2(0, 1)
-shader_parameter/amplitudeWave2 = 0.387
-shader_parameter/steepnessWave2 = 0.442
-shader_parameter/frequencyWave2 = 0.858
-shader_parameter/speedWave2 = 0.216
+shader_parameter/directionWave2 = Vector2(1, 0.53)
+shader_parameter/amplitudeWave2 = 0.379
+shader_parameter/steepnessWave2 = 0.105
+shader_parameter/frequencyWave2 = 0.541
+shader_parameter/speedWave2 = 2.0
+shader_parameter/gerstner_waves_length = 1
+shader_parameter/waveDirection = PackedVector2Array(1, 0)
+shader_parameter/waveSpeed = PackedFloat32Array(1)
+shader_parameter/waveFrequency = PackedFloat32Array(1)
+shader_parameter/waveAmplitude = PackedFloat32Array(0.5)
+shader_parameter/waveSteepness = PackedFloat32Array(0.4)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_x23f0"]
 material = SubResource("ShaderMaterial_i880s")
@@ -87,7 +107,13 @@ trackedNode = NodePath("../Camera3D")
 
 [node name="Ocean" type="Node3D" parent="."]
 script = ExtResource("3_yj8kt")
+Waves = [ExtResource("4_r43mp")]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ocean"]
+mesh = SubResource("PlaneMesh_x23f0")
+skeleton = NodePath("../..")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Ocean"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, 0, 0)
 mesh = SubResource("PlaneMesh_x23f0")
 skeleton = NodePath("../..")

@@ -8,6 +8,12 @@
 
 config_version=5
 
+[MonoCustomResourceRegistry]
+
+ClassPrefix=""
+SearchType=0
+ResourceScriptDirectories=["res://addons/WaterSystem"]
+
 [application]
 
 config/name="Under The Sea"
@@ -21,7 +27,7 @@ project/assembly_name="Under The Sea"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/tessarakkt.oceanfft/plugin.cfg")
+enabled=PackedStringArray("res://addons/tessarakkt.oceanfft/plugin.cfg", "res://addons/MonoCustomResourceRegistry/plugin.cfg")
 
 [input]
 
