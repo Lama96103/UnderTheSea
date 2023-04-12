@@ -1,4 +1,5 @@
 shader_type spatial;
+render_mode blend_mix, depth_draw_always, diffuse_burley,shadows_disabled;
 
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
@@ -13,22 +14,10 @@ uniform float metallic : hint_range(0.0, 1.0) = 0;
 uniform float roughness : hint_range(0.0, 1.0) = 0.02;
 
 uniform sampler2D texture_normal1;
+uniform vec2 texture_normal1_dir= vec2(0.75, 0);
 uniform sampler2D texture_normal2;
+uniform vec2 texture_normal2_dir = vec2(1,0);
 
-
-group_uniforms Wave1;
-uniform vec2 directionWave1;
-uniform float amplitudeWave1;
-uniform float steepnessWave1;
-uniform float frequencyWave1;
-uniform float speedWave1;
-
-group_uniforms Wave2;
-uniform vec2 directionWave2;
-uniform float amplitudeWave2;
-uniform float steepnessWave2;
-uniform float frequencyWave2;
-uniform float speedWave2;
 
 group_uniforms WaveSettings;
 uniform int gerstner_waves_length;
@@ -125,13 +114,13 @@ void fragment() {
 	vec3 depth_color = mix(color_shallow.rgb, color_deep.rgb, depth_blend_power);
 	vec3 color = mix(screen_color * depth_color, depth_color * 0.25, depth_blend_power * 0.5);
 	
-	vec3 normal_blend = mix(texture(texture_normal1,UV + (directionWave1 * TIME * 0.01)).rgb, texture(texture_normal2,UV + (directionWave2 * TIME * 0.01)).rgb, 0.5);
+	vec3 normal_blend = mix(texture(texture_normal1,UV + (texture_normal1_dir * TIME * 0.01)).rgb, texture(texture_normal2,UV + (texture_normal2_dir * TIME * 0.01)).rgb, 0.5);
 	
 	float fresnel = fresnel(5.0, NORMAL, VIEW);
 	vec3 surface_color = mix(color_shallow, vec4(1,1,1,1), fresnel).rgb; // Interpolate albedo values by frensel
 	
-	//ALBEDO = mix(surface_color, color, 0.75);
-	ALBEDO = color;
+	ALBEDO = mix(surface_color, color, 0.75);
+	//ALBEDO = color;
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	NORMAL_MAP = normal_blend;
