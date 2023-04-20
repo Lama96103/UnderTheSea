@@ -28,6 +28,9 @@ namespace WaterSystem
         [Export] private Texture2D noise_Normal2;
         [Export] private Vector2 noise_Direction2;
 
+        private float currentTime = 0;
+        private bool isAboveWater = true;
+
 
         #region Waves
         [ExportGroup("Waves")]
@@ -74,24 +77,102 @@ namespace WaterSystem
         [Export] private float wave5_steepness = 0.5f;
         #endregion
 
-       
+        public static Vector3 Normalized3(Vector2 vec)
+        {
+            Vector2 work = vec.Normalized();
+            return new Vector3(work.X, 0, work.Y);
+        }
 
         private Godot.Collections.Dictionary<Vector3, MeshInstance3D> generatedMeshes = new Godot.Collections.Dictionary<Vector3, MeshInstance3D>();
 
-        public override void _Process(double delta)
+        public override void _Ready()
         {
-            if(generate)
+            if(!Engine.IsEditorHint())
             {
-                generate = false;
                 Cleanup();
                 GenerateMesh();
             }
+        }
 
-            if(updateShader)
+        public override void _Process(double delta)
+        {
+            currentTime += (float)(delta);
+
+            if(oceanMaterial != null) oceanMaterial.SetShaderParameter("shaderTime", currentTime);
+            
+
+            if(Engine.IsEditorHint())
             {
-                updateShader = false;
-                SetShader();
+                if(generate)
+                {
+                    generate = false;
+                    Cleanup();
+                    GenerateMesh();
+                }
+
+                if(updateShader)
+                {
+                    updateShader = false;
+                    SetShader();
+                }
+                return;
             }
+
+            Camera3D camera = GetViewport().GetCamera3D();
+
+            if(camera != null)
+            {
+                this.Position = new Vector3(camera.GlobalPosition.X, 0, camera.GlobalPosition.Z);
+
+                float height = CalculateHeight(camera.GlobalPosition);
+
+                if(height < 0 && isAboveWater)
+                {
+                    GD.Print("Camera entered under water");
+                    // oceanMaterial.SetShaderParameter("normal_factor", -1);
+                    isAboveWater = false;
+                }
+                else if(height > 0 && !isAboveWater)
+                {
+                    GD.Print("Camera entered above water");
+                    // oceanMaterial.SetShaderParameter("normal_factor", 1);
+                    isAboveWater = true;
+                }
+            }
+        }
+
+        public float CalculateHeight(Vector3 position)
+        {
+            int waveCount = (wave1_enabled ? 1 : 0) + (wave2_enabled ? 1: 0)+ (wave3_enabled ? 1: 0)+ (wave4_enabled ? 1: 0)+ (wave5_enabled ? 1: 0);
+            Godot.Collections.Array<Vector3> waveDirection = new Godot.Collections.Array<Vector3>{Normalized3(wave1_direction), Normalized3(wave2_direction), Normalized3(wave3_direction),Normalized3(wave4_direction),Normalized3(wave5_direction)};
+            Godot.Collections.Array<float> waveSpeed = new Godot.Collections.Array<float> {   wave1_speed, wave2_speed, wave3_speed, wave4_speed, wave5_speed};
+            Godot.Collections.Array<float> waveFrequency = new Godot.Collections.Array<float>{wave1_frequency, wave2_frequency, wave3_frequency, wave4_frequency, wave5_frequency};
+            Godot.Collections.Array<float> waveAmplitude = new Godot.Collections.Array<float>{wave1_amplitude, wave2_amplitude, wave3_amplitude, wave4_amplitude, wave5_amplitude};
+            Godot.Collections.Array<float> waveSteepness = new Godot.Collections.Array<float>{wave1_steepness, wave2_steepness, wave3_steepness, wave4_steepness, wave5_steepness};
+
+
+            Vector3 wave_position = new Vector3(0, 0, 0);
+            Vector3 vertPos = new Vector3(position.X, 0, position.Y);
+            for (int i = 0; i < waveCount; ++i) {
+                float proj = position.Dot(waveDirection[i]),
+                    phase = currentTime * waveSpeed[i],
+                    theta = proj * waveFrequency[i] + phase,
+                    height = waveAmplitude[i] * Mathf.Sin(theta);
+
+                wave_position.Y += height;
+
+                float maximum_width = waveSteepness[i] *
+                                    waveAmplitude[i],
+                    width = maximum_width * Mathf.Cos(theta),
+                    x = waveDirection[i].X,
+                    y = waveDirection[i].Y;
+
+                wave_position.X += x * width;
+                wave_position.Z += y * width;
+            } 
+            vertPos += wave_position;
+
+            return vertPos.Y;
         }
 
         private void Cleanup()
@@ -156,6 +237,7 @@ namespace WaterSystem
             oceanMaterial.SetShaderParameter("depth_offset", depthOffset);
             oceanMaterial.SetShaderParameter("metallic", metallic);
             oceanMaterial.SetShaderParameter("roughness", roughness);
+            oceanMaterial.SetShaderParameter("shaderTime", currentTime);
 
             oceanMaterial.SetShaderParameter("texture_normal1", noise_Normal1);
             oceanMaterial.SetShaderParameter("texture_normal1_dir", noise_Direction1);

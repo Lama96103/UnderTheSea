@@ -27,7 +27,7 @@ project/assembly_name="Under The Sea"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/tessarakkt.oceanfft/plugin.cfg", "res://addons/MonoCustomResourceRegistry/plugin.cfg")
+enabled=PackedStringArray("res://addons/tessarakkt.oceanfft/plugin.cfg")
 
 [input]
 

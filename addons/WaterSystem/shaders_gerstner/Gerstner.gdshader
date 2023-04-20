@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode blend_mix, depth_draw_always, diffuse_burley,shadows_disabled;
+render_mode blend_mix, depth_draw_always, diffuse_burley,shadows_disabled,cull_disabled;
 
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
@@ -13,10 +13,14 @@ uniform float 	depth_offset	 = -0.75;						// Offset for the blending
 uniform float metallic : hint_range(0.0, 1.0) = 0;
 uniform float roughness : hint_range(0.0, 1.0) = 0.02;
 
+uniform float shaderTime = 0;
+
 uniform sampler2D texture_normal1;
 uniform vec2 texture_normal1_dir= vec2(0.75, 0);
 uniform sampler2D texture_normal2;
 uniform vec2 texture_normal2_dir = vec2(1,0);
+
+uniform float normal_factor = 1;
 
 
 group_uniforms WaveSettings;
@@ -95,9 +99,9 @@ void vertex()
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 vertex_normal = vec3(0, 1, 0);
 
-	vertex += gerstner_wave(world_pos.xz, TIME, vertex_normal);
+	vertex += gerstner_wave(world_pos.xz, shaderTime, vertex_normal);
 	
-	NORMAL			 = vertex_normal;
+	NORMAL			 = vertex_normal * normal_factor;
 	VERTEX			 = vertex.xyz;
 	height = vertex.y;
 }
@@ -114,7 +118,7 @@ void fragment() {
 	vec3 depth_color = mix(color_shallow.rgb, color_deep.rgb, depth_blend_power);
 	vec3 color = mix(screen_color * depth_color, depth_color * 0.25, depth_blend_power * 0.5);
 	
-	vec3 normal_blend = mix(texture(texture_normal1,UV + (texture_normal1_dir * TIME * 0.01)).rgb, texture(texture_normal2,UV + (texture_normal2_dir * TIME * 0.01)).rgb, 0.5);
+	vec3 normal_blend = mix(texture(texture_normal1,UV + (texture_normal1_dir * shaderTime * 0.01)).rgb, texture(texture_normal2,UV + (texture_normal2_dir * shaderTime * 0.01)).rgb, 0.5);
 	
 	float fresnel = fresnel(5.0, NORMAL, VIEW);
 	vec3 surface_color = mix(color_shallow, vec4(1,1,1,1), fresnel).rgb; // Interpolate albedo values by frensel
