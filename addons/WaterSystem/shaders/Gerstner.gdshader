@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode blend_mix, depth_draw_always, diffuse_burley,shadows_disabled,cull_disabled;
+render_mode blend_mix, depth_draw_always, diffuse_burley,shadows_disabled,cull_disabled,world_vertex_coords;
 
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
@@ -90,13 +90,13 @@ float fresnel(float amount, vec3 normal, vec3 view)
 	return pow((1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0 )), amount);
 }
 
-varying float height;
-varying vec3 world_pos;
+varying float height;varying vec3 world_pos;
 
 void vertex()
 {	
 	vec3 vertex = VERTEX;
-	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	// world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	world_pos = vertex;
 	vec3 vertex_normal = vec3(0, 1, 0);
 
 	vertex += gerstner_wave(world_pos.xz, shaderTime, vertex_normal);

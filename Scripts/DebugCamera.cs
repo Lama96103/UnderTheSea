@@ -5,11 +5,21 @@ public partial class DebugCamera : Camera3D
 {
 	[Export] private float Speed = 6;
 	[Export] private float Sensitivity = 1f;
+	[Export] private bool lightEnabled = false;
 
 	private float totalPitch = 0.0f;
 	private Vector2 mousePosition = Vector2.Zero;
 
 	private bool isActive = false;
+
+	public override void _Ready()
+	{
+		foreach(Light3D light in GetChildren())
+		{
+			if(lightEnabled) light.Show();
+			else light.Hide();
+		}
+	}
 
 	public override void _Process(double delta)
 	{
@@ -22,7 +32,21 @@ public partial class DebugCamera : Camera3D
 				Input.MouseMode = Input.MouseModeEnum.Visible;
 		}
 
-		if(isActive) CalculateCamera((float)delta);
+		if(isActive) 
+		{
+			CalculateCamera((float)delta);
+			if(Input.IsActionJustPressed("debug_action"))
+			{
+				lightEnabled = !lightEnabled;
+				foreach(Light3D light in GetChildren())
+				{
+					if(lightEnabled) light.Show();
+					else light.Hide();
+				}
+			}
+
+		}
+
 	}	
 
 	private void CalculateCamera(float delta)

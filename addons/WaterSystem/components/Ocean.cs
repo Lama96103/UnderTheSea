@@ -6,7 +6,6 @@ namespace WaterSystem
     [Tool]
     public partial class Ocean : Node3D
     {
-        // [Export] private System WaveSystem = System.Gerstner;
         [Export] private float ChunkSize = 50;
         [Export] private float[] Lod = new float[]{2,1,0.5f};
         private ShaderMaterial oceanMaterial;
@@ -22,6 +21,10 @@ namespace WaterSystem
         [Export] private float metallic = 0;
         [Export] private float roughness = 0.02f;
 
+        [ExportGroup("Environment")]
+        [Export] private Godot.Environment underWaterEnvironment;
+        [Export] private Godot.Environment aboveWaterEnvironment;
+
         [ExportGroup("Normal Maps" ,"noise_")]
         [Export] private Texture2D noise_Normal1;
         [Export] private Vector2 noise_Direction1;
@@ -30,6 +33,8 @@ namespace WaterSystem
 
         private float currentTime = 0;
         private bool isAboveWater = true;
+
+
 
 
         #region Waves
@@ -76,6 +81,14 @@ namespace WaterSystem
         [Export] private float wave5_amplitude = 0.5f;
         [Export] private float wave5_steepness = 0.5f;
         #endregion
+
+
+        int curWaveCount = 0;
+        Godot.Collections.Array<Vector2> curWaveDirection = null;
+        Godot.Collections.Array<float> curWaveSpeed;
+        Godot.Collections.Array<float> curWaveFrequency;
+        Godot.Collections.Array<float> curWaveAmplitude;
+        Godot.Collections.Array<float> curWaveSteepness;
 
         public static Vector3 Normalized3(Vector2 vec)
         {
@@ -126,49 +139,65 @@ namespace WaterSystem
 
                 float height = CalculateHeight(camera.GlobalPosition);
 
-                if(height < 0 && isAboveWater)
+                float cameraDepth = camera.GlobalPosition.Y - height;
+
+                if(cameraDepth < 0 && isAboveWater)
                 {
                     GD.Print("Camera entered under water");
                     // oceanMaterial.SetShaderParameter("normal_factor", -1);
                     isAboveWater = false;
+
+                    GetParent<WorldEnvironment>().Environment = underWaterEnvironment;
                 }
-                else if(height > 0 && !isAboveWater)
+                else if(cameraDepth > 0 && !isAboveWater)
                 {
                     GD.Print("Camera entered above water");
                     // oceanMaterial.SetShaderParameter("normal_factor", 1);
                     isAboveWater = true;
+                    GetParent<WorldEnvironment>().Environment = aboveWaterEnvironment;
                 }
+
+                if(!isAboveWater) UpdateUnderwaterScene(cameraDepth);
             }
+
+            
+        }
+
+        private void UpdateUnderwaterScene(float depth)
+        {
+            DirectionalLight3D sunLight = GetParent().GetNode<DirectionalLight3D>("Sun_Light");
+
+            float lightStrength = Mathf.Lerp(1, 0, depth / -175);
+            sunLight.LightEnergy = lightStrength;
+
+
+            GD.Print(depth + " m");
+
+
         }
 
         public float CalculateHeight(Vector3 position)
         {
-            int waveCount = (wave1_enabled ? 1 : 0) + (wave2_enabled ? 1: 0)+ (wave3_enabled ? 1: 0)+ (wave4_enabled ? 1: 0)+ (wave5_enabled ? 1: 0);
-            Godot.Collections.Array<Vector3> waveDirection = new Godot.Collections.Array<Vector3>{Normalized3(wave1_direction), Normalized3(wave2_direction), Normalized3(wave3_direction),Normalized3(wave4_direction),Normalized3(wave5_direction)};
-            Godot.Collections.Array<float> waveSpeed = new Godot.Collections.Array<float> {   wave1_speed, wave2_speed, wave3_speed, wave4_speed, wave5_speed};
-            Godot.Collections.Array<float> waveFrequency = new Godot.Collections.Array<float>{wave1_frequency, wave2_frequency, wave3_frequency, wave4_frequency, wave5_frequency};
-            Godot.Collections.Array<float> waveAmplitude = new Godot.Collections.Array<float>{wave1_amplitude, wave2_amplitude, wave3_amplitude, wave4_amplitude, wave5_amplitude};
-            Godot.Collections.Array<float> waveSteepness = new Godot.Collections.Array<float>{wave1_steepness, wave2_steepness, wave3_steepness, wave4_steepness, wave5_steepness};
-
-
             Vector3 wave_position = new Vector3(0, 0, 0);
             Vector3 vertPos = new Vector3(position.X, 0, position.Y);
-            for (int i = 0; i < waveCount; ++i) {
-                float proj = position.Dot(waveDirection[i]),
-                    phase = currentTime * waveSpeed[i],
-                    theta = proj * waveFrequency[i] + phase,
-                    height = waveAmplitude[i] * Mathf.Sin(theta);
+            for (int i = 0; i < curWaveCount; ++i) {
+                float proj = position.Dot(Normalized3(curWaveDirection[i])),
+                    phase = currentTime * curWaveSpeed[i],
+                    theta = proj * curWaveFrequency[i] + phase,
+                    height = curWaveAmplitude[i] * Mathf.Sin(theta);
 
                 wave_position.Y += height;
 
-                float maximum_width = waveSteepness[i] *
-                                    waveAmplitude[i],
+                /*
+                float maximum_width = curWaveSteepness[i] *
+                                    curWaveAmplitude[i],
                     width = maximum_width * Mathf.Cos(theta),
-                    x = waveDirection[i].X,
-                    y = waveDirection[i].Y;
+                    x = curWaveDirection[i].X,
+                    y = curWaveDirection[i].Y;
 
                 wave_position.X += x * width;
                 wave_position.Z += y * width;
+                */
             } 
             vertPos += wave_position;
 
@@ -244,20 +273,20 @@ namespace WaterSystem
             oceanMaterial.SetShaderParameter("texture_normal2", noise_Normal2);
             oceanMaterial.SetShaderParameter("texture_normal2_dir", noise_Direction2);
 
+            curWaveCount = (wave1_enabled ? 1 : 0) + (wave2_enabled ? 1: 0)+ (wave3_enabled ? 1: 0)+ (wave4_enabled ? 1: 0)+ (wave5_enabled ? 1: 0);
+            curWaveDirection = new Godot.Collections.Array<Vector2>{wave1_direction.Normalized(), wave2_direction.Normalized(), wave3_direction.Normalized(),wave4_direction.Normalized(),wave5_direction.Normalized()};
+            curWaveSpeed = new Godot.Collections.Array<float> {   wave1_speed, wave2_speed, wave3_speed, wave4_speed, wave5_speed};
+            curWaveFrequency = new Godot.Collections.Array<float>{wave1_frequency, wave2_frequency, wave3_frequency, wave4_frequency, wave5_frequency};
+            curWaveAmplitude = new Godot.Collections.Array<float>{wave1_amplitude, wave2_amplitude, wave3_amplitude, wave4_amplitude, wave5_amplitude};
+            curWaveSteepness = new Godot.Collections.Array<float>{wave1_steepness, wave2_steepness, wave3_steepness, wave4_steepness, wave5_steepness};
 
-            int waveCount = (wave1_enabled ? 1 : 0) + (wave2_enabled ? 1: 0)+ (wave3_enabled ? 1: 0)+ (wave4_enabled ? 1: 0)+ (wave5_enabled ? 1: 0);
-            oceanMaterial.SetShaderParameter("gerstner_waves_length", waveCount);
 
-            oceanMaterial.SetShaderParameter("waveDirection", new Godot.Collections.Array{wave1_direction.Normalized(), wave2_direction.Normalized(),wave3_direction.Normalized(),wave4_direction.Normalized(),wave5_direction.Normalized()});
-            oceanMaterial.SetShaderParameter("waveSpeed", new Godot.Collections.Array{   wave1_speed, wave2_speed, wave3_speed, wave4_speed, wave5_speed});
-            oceanMaterial.SetShaderParameter("waveFrequency", new Godot.Collections.Array{wave1_frequency, wave2_frequency, wave3_frequency, wave4_frequency, wave5_frequency});
-            oceanMaterial.SetShaderParameter("waveAmplitude", new Godot.Collections.Array{wave1_amplitude, wave2_amplitude, wave3_amplitude, wave4_amplitude, wave5_amplitude});
-            oceanMaterial.SetShaderParameter("waveSteepness", new Godot.Collections.Array{wave1_steepness, wave2_steepness, wave3_steepness, wave4_steepness, wave5_steepness});
-        }
-        public enum System
-        {
-            Gerstner ,
-            FFT
+            oceanMaterial.SetShaderParameter("gerstner_waves_length", curWaveCount);
+            oceanMaterial.SetShaderParameter("waveDirection", curWaveDirection);
+            oceanMaterial.SetShaderParameter("waveSpeed", curWaveSpeed);
+            oceanMaterial.SetShaderParameter("waveFrequency", curWaveFrequency);
+            oceanMaterial.SetShaderParameter("waveAmplitude", curWaveAmplitude);
+            oceanMaterial.SetShaderParameter("waveSteepness", curWaveSteepness);
         }
 
     

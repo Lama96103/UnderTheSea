@@ -66,7 +66,7 @@ void main() {
 
     float noise = CaculateNoise(pos, noise_input_data.persistence, noise_input_data.scale, noise_input_data.octaves);
 
-    float seaLevel = -100;
+    float seaLevel = -50;
     float seaLevelWeigth = 1;
     float floorLevel = -200;
     float floorWeight = 0;
