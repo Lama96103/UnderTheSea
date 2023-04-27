@@ -80,6 +80,14 @@ namespace WaterSystem
         [Export] private float wave5_frequency = 1;
         [Export] private float wave5_amplitude = 0.5f;
         [Export] private float wave5_steepness = 0.5f;
+
+        [ExportSubgroup("Wave 6", "wave6_")]
+        [Export] private bool wave6_enabled = false;
+        [Export] private Vector2 wave6_direction = new Vector2(1,0);
+        [Export] private float wave6_speed = 1;
+        [Export] private float wave6_frequency = 1;
+        [Export] private float wave6_amplitude = 0.5f;
+        [Export] private float wave6_steepness = 0.5f;
         #endregion
 
 
@@ -273,12 +281,12 @@ namespace WaterSystem
             oceanMaterial.SetShaderParameter("texture_normal2", noise_Normal2);
             oceanMaterial.SetShaderParameter("texture_normal2_dir", noise_Direction2);
 
-            curWaveCount = (wave1_enabled ? 1 : 0) + (wave2_enabled ? 1: 0)+ (wave3_enabled ? 1: 0)+ (wave4_enabled ? 1: 0)+ (wave5_enabled ? 1: 0);
-            curWaveDirection = new Godot.Collections.Array<Vector2>{wave1_direction.Normalized(), wave2_direction.Normalized(), wave3_direction.Normalized(),wave4_direction.Normalized(),wave5_direction.Normalized()};
-            curWaveSpeed = new Godot.Collections.Array<float> {   wave1_speed, wave2_speed, wave3_speed, wave4_speed, wave5_speed};
-            curWaveFrequency = new Godot.Collections.Array<float>{wave1_frequency, wave2_frequency, wave3_frequency, wave4_frequency, wave5_frequency};
-            curWaveAmplitude = new Godot.Collections.Array<float>{wave1_amplitude, wave2_amplitude, wave3_amplitude, wave4_amplitude, wave5_amplitude};
-            curWaveSteepness = new Godot.Collections.Array<float>{wave1_steepness, wave2_steepness, wave3_steepness, wave4_steepness, wave5_steepness};
+            curWaveCount = (wave1_enabled ? 1 : 0) + (wave2_enabled ? 1: 0)+ (wave3_enabled ? 1: 0)+ (wave4_enabled ? 1: 0) + (wave5_enabled ? 1: 0)  + (wave6_enabled ? 1: 0);
+            curWaveDirection = new Godot.Collections.Array<Vector2>{wave1_direction.Normalized(), wave2_direction.Normalized(), wave3_direction.Normalized(),wave4_direction.Normalized(),wave5_direction.Normalized(),wave6_direction.Normalized()};
+            curWaveSpeed = new Godot.Collections.Array<float> {   wave1_speed, wave2_speed, wave3_speed, wave4_speed, wave5_speed, wave6_speed};
+            curWaveFrequency = new Godot.Collections.Array<float>{wave1_frequency, wave2_frequency, wave3_frequency, wave4_frequency, wave5_frequency, wave6_frequency};
+            curWaveAmplitude = new Godot.Collections.Array<float>{wave1_amplitude, wave2_amplitude, wave3_amplitude, wave4_amplitude, wave5_amplitude, wave6_amplitude};
+            curWaveSteepness = new Godot.Collections.Array<float>{wave1_steepness, wave2_steepness, wave3_steepness, wave4_steepness, wave5_steepness, wave6_steepness};
 
 
             oceanMaterial.SetShaderParameter("gerstner_waves_length", curWaveCount);
