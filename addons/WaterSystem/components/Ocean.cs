@@ -6,6 +6,7 @@ namespace WaterSystem
     [Tool]
     public partial class Ocean : Node3D
     {
+        public static Ocean Instance = null;
         [Export] private float ChunkSize = 50;
         [Export] private float[] Lod = new float[]{2,1,0.5f};
         private ShaderMaterial oceanMaterial;
@@ -112,6 +113,8 @@ namespace WaterSystem
             {
                 Cleanup();
                 GenerateMesh();
+
+                Ocean.Instance = this; 
             }
         }
 
@@ -145,7 +148,7 @@ namespace WaterSystem
             {
                 this.Position = new Vector3(camera.GlobalPosition.X, 0, camera.GlobalPosition.Z);
 
-                float height = CalculateHeight(camera.GlobalPosition);
+                float height = GetWaveHeight(camera.GlobalPosition);
 
                 float cameraDepth = camera.GlobalPosition.Y - height;
 
@@ -184,7 +187,7 @@ namespace WaterSystem
 
         }
 
-        public float CalculateHeight(Vector3 position)
+        public float GetWaveHeight(Vector3 position)
         {
             Vector3 wave_position = new Vector3(0, 0, 0);
             Vector3 vertPos = new Vector3(position.X, 0, position.Y);

@@ -1,10 +1,12 @@
-[gd_scene load_steps=93 format=3 uid="uid://blj0kq8voxv1g"]
+[gd_scene load_steps=96 format=3 uid="uid://blj0kq8voxv1g"]
 
 [ext_resource type="Script" path="res://Scripts/DebugCamera.cs" id="1_ilr4a"]
 [ext_resource type="Environment" uid="uid://8g4qg7p4plxo" path="res://addons/WaterSystem/Environments/AboveWater.tres" id="1_s0w40"]
 [ext_resource type="PackedScene" path="res://addons/MarchingCubes/MarchingCubes.tscn" id="2_spxkd"]
 [ext_resource type="Script" path="res://addons/WaterSystem/components/Ocean.cs" id="3_yj8kt"]
 [ext_resource type="Shader" path="res://addons/WaterSystem/shaders/Gerstner.gdshader" id="4_p13yi"]
+[ext_resource type="Script" path="res://addons/WaterSystem/components/BuoyancyBody.cs" id="6_mg5o3"]
+[ext_resource type="Script" path="res://addons/WaterSystem/components/BuoyancyProbe.cs" id="7_i05ol"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_iqxmp"]
 noise_type = 0
@@ -31,7 +33,7 @@ seamless = true
 as_normal_map = true
 noise = SubResource("FastNoiseLite_b4lue")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_kxui3"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tp5xx"]
 render_priority = 0
 shader = ExtResource("4_p13yi")
 shader_parameter/color_deep = Color(0.0431373, 0.0941176, 0.317647, 1)
@@ -40,7 +42,7 @@ shader_parameter/beers_law = 2.0
 shader_parameter/depth_offset = -0.75
 shader_parameter/metallic = 0.0
 shader_parameter/roughness = 0.055
-shader_parameter/shaderTime = 508.958
+shader_parameter/shaderTime = 1239.58
 shader_parameter/texture_normal1_dir = Vector2(0.695, 0.754)
 shader_parameter/texture_normal2_dir = Vector2(0.382, 0.3)
 shader_parameter/normal_factor = 1.0
@@ -53,499 +55,503 @@ shader_parameter/waveFrequency = [0.1, 0.1, 0.337, 0.267, 1.0, 1.0]
 shader_parameter/waveAmplitude = [1.0, 1.0, 0.728, 0.669, 0.1, 0.1]
 shader_parameter/waveSteepness = [0.5, 0.5, 0.594, 0.5, 0.109, 0.109]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_i4ls6"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_8buuf"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_c5ol0"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_lf7l4"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ftc5g"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_k4uj7"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_whegl"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_x773d"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_k2tnv"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_qyajk"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_oywv0"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_bwyd5"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_d7ble"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_odjlg"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ln7v0"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_jx7m4"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_g3yoq"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_edqbt"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_4v15i"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_vgqfb"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_gpwy5"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_r7ujw"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_niwgw"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_3ramd"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_txugp"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_iiwvb"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_juyg8"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_x2qwq"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_sfj1s"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_2sdyg"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_dehub"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_i2jdo"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_wqne2"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_8ykxf"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_kyr1d"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_an3ng"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_rbqu5"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_pyah5"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_wmoco"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_hyd2b"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_63mjc"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_qdwl6"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_un7av"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_a1ifo"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_frydf"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ne6pl"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_yno55"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_bkacb"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_2y8on"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_vvlqr"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_8d78m"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ctluw"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_njf8k"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_xhi0r"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_5c7sb"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_5oogn"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_36cqe"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ovfwq"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_7shwi"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_nci73"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_80lhh"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ybxvf"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ifw28"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_1ytnq"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_i57e3"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_pfort"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ljy3e"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_begu8"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_67xok"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_a0mjy"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_wi0m0"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ayur1"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_b00cy"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_d2df0"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_elc3k"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ub51u"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ftnr4"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_h2fqa"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_mxiuv"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_kx4lb"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ulndo"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_fww5f"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 256
 subdivide_depth = 256
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_u82ky"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_0yab8"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_j1chw"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_1cdam"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_t74bs"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_6cis1"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_5afx0"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_htpes"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_5r6p6"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_l71le"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_5do7r"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_yclxb"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_gvg7g"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_f4ueq"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_v4b7t"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_v2yel"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_qm63e"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_d5mr7"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_dsvmr"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_r75ws"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_2kpjq"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_11njs"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_kfcqt"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_3lubp"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_mm2b1"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_pfjun"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_lgj8m"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_e28nv"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_4fols"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_tnhfi"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_766di"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_2jok1"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_y2dph"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_2u63d"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ak72g"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_7itar"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_o47qc"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_aw24a"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_sgr4j"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_h3m7j"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 64
 subdivide_depth = 64
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_u5a2m"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_jbo4g"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_37i1t"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_fk5hg"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_gsd7q"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_72kuc"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_jrk06"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_2qiii"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_pads7"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_jgg5y"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_qvu6v"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_bxvu1"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_hey4t"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_01bct"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_bcgvu"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_5u3hb"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_o422t"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_nws4w"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_s1m8d"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_q4cfp"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_lxja3"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_y8k7y"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_xly6v"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_d0t8d"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_670sr"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_d5t0v"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ny1wk"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ckxn1"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_65ck1"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_di1kh"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_a6udk"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_a6ahj"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_46mir"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_dv5jn"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_a77hd"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_2qhpa"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_e2svl"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ij2u7"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_0ebsu"]
-material = SubResource("ShaderMaterial_kxui3")
+[sub_resource type="PlaneMesh" id="PlaneMesh_ifif5"]
+material = SubResource("ShaderMaterial_tp5xx")
 size = Vector2(32, 32)
 subdivide_width = 8
 subdivide_depth = 8
 
 [sub_resource type="BoxMesh" id="BoxMesh_pshwd"]
+size = Vector3(5, 1, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cfhsy"]
+size = Vector3(5, 1, 2)
 
 [node name="Root" type="WorldEnvironment"]
 environment = ExtResource("1_s0w40")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 17.42)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.200769, 2.57024, 12.9716)
 current = true
 script = ExtResource("1_ilr4a")
 Speed = 8.0
@@ -615,327 +621,377 @@ wave6_steepness = 0.109
 
 [node name="(-128, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, -128)
-mesh = SubResource("PlaneMesh_i4ls6")
+mesh = SubResource("PlaneMesh_8buuf")
 
 [node name="(-128, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, -96)
-mesh = SubResource("PlaneMesh_c5ol0")
+mesh = SubResource("PlaneMesh_lf7l4")
 
 [node name="(-128, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, -64)
-mesh = SubResource("PlaneMesh_ftc5g")
+mesh = SubResource("PlaneMesh_k4uj7")
 
 [node name="(-128, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, -32)
-mesh = SubResource("PlaneMesh_whegl")
+mesh = SubResource("PlaneMesh_x773d")
 
 [node name="(-128, 0, 0)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, 0)
-mesh = SubResource("PlaneMesh_k2tnv")
+mesh = SubResource("PlaneMesh_qyajk")
 
 [node name="(-128, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, 32)
-mesh = SubResource("PlaneMesh_oywv0")
+mesh = SubResource("PlaneMesh_bwyd5")
 
 [node name="(-128, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, 64)
-mesh = SubResource("PlaneMesh_d7ble")
+mesh = SubResource("PlaneMesh_odjlg")
 
 [node name="(-128, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, 96)
-mesh = SubResource("PlaneMesh_ln7v0")
+mesh = SubResource("PlaneMesh_jx7m4")
 
 [node name="(-128, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 0, 128)
-mesh = SubResource("PlaneMesh_g3yoq")
+mesh = SubResource("PlaneMesh_edqbt")
 
 [node name="(-96, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, -128)
-mesh = SubResource("PlaneMesh_4v15i")
+mesh = SubResource("PlaneMesh_vgqfb")
 
 [node name="(-96, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, -96)
-mesh = SubResource("PlaneMesh_gpwy5")
+mesh = SubResource("PlaneMesh_r7ujw")
 
 [node name="(-96, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, -64)
-mesh = SubResource("PlaneMesh_niwgw")
+mesh = SubResource("PlaneMesh_3ramd")
 
 [node name="(-96, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, -32)
-mesh = SubResource("PlaneMesh_txugp")
+mesh = SubResource("PlaneMesh_iiwvb")
 
 [node name="(-96, 0, 0)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, 0)
-mesh = SubResource("PlaneMesh_juyg8")
+mesh = SubResource("PlaneMesh_x2qwq")
 
 [node name="(-96, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, 32)
-mesh = SubResource("PlaneMesh_sfj1s")
+mesh = SubResource("PlaneMesh_2sdyg")
 
 [node name="(-96, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, 64)
-mesh = SubResource("PlaneMesh_dehub")
+mesh = SubResource("PlaneMesh_i2jdo")
 
 [node name="(-96, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, 96)
-mesh = SubResource("PlaneMesh_wqne2")
+mesh = SubResource("PlaneMesh_8ykxf")
 
 [node name="(-96, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 0, 128)
-mesh = SubResource("PlaneMesh_kyr1d")
+mesh = SubResource("PlaneMesh_an3ng")
 
 [node name="(-64, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, -128)
-mesh = SubResource("PlaneMesh_rbqu5")
+mesh = SubResource("PlaneMesh_pyah5")
 
 [node name="(-64, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, -96)
-mesh = SubResource("PlaneMesh_wmoco")
+mesh = SubResource("PlaneMesh_hyd2b")
 
 [node name="(-64, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, -64)
-mesh = SubResource("PlaneMesh_63mjc")
+mesh = SubResource("PlaneMesh_qdwl6")
 
 [node name="(-64, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, -32)
-mesh = SubResource("PlaneMesh_un7av")
+mesh = SubResource("PlaneMesh_a1ifo")
 
 [node name="(-64, 0, 0)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, 0)
-mesh = SubResource("PlaneMesh_frydf")
+mesh = SubResource("PlaneMesh_ne6pl")
 
 [node name="(-64, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, 32)
-mesh = SubResource("PlaneMesh_yno55")
+mesh = SubResource("PlaneMesh_bkacb")
 
 [node name="(-64, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, 64)
-mesh = SubResource("PlaneMesh_2y8on")
+mesh = SubResource("PlaneMesh_vvlqr")
 
 [node name="(-64, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, 96)
-mesh = SubResource("PlaneMesh_8d78m")
+mesh = SubResource("PlaneMesh_ctluw")
 
 [node name="(-64, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 0, 128)
-mesh = SubResource("PlaneMesh_njf8k")
+mesh = SubResource("PlaneMesh_xhi0r")
 
 [node name="(-32, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -128)
-mesh = SubResource("PlaneMesh_5c7sb")
+mesh = SubResource("PlaneMesh_5oogn")
 
 [node name="(-32, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -96)
-mesh = SubResource("PlaneMesh_36cqe")
+mesh = SubResource("PlaneMesh_ovfwq")
 
 [node name="(-32, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -64)
-mesh = SubResource("PlaneMesh_7shwi")
+mesh = SubResource("PlaneMesh_nci73")
 
 [node name="(-32, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -32)
-mesh = SubResource("PlaneMesh_80lhh")
+mesh = SubResource("PlaneMesh_ybxvf")
 
 [node name="(-32, 0, 0)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 0)
-mesh = SubResource("PlaneMesh_ifw28")
+mesh = SubResource("PlaneMesh_1ytnq")
 
 [node name="(-32, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 32)
-mesh = SubResource("PlaneMesh_i57e3")
+mesh = SubResource("PlaneMesh_pfort")
 
 [node name="(-32, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 64)
-mesh = SubResource("PlaneMesh_ljy3e")
+mesh = SubResource("PlaneMesh_begu8")
 
 [node name="(-32, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 96)
-mesh = SubResource("PlaneMesh_67xok")
+mesh = SubResource("PlaneMesh_a0mjy")
 
 [node name="(-32, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 128)
-mesh = SubResource("PlaneMesh_wi0m0")
+mesh = SubResource("PlaneMesh_ayur1")
 
 [node name="(0, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -128)
-mesh = SubResource("PlaneMesh_b00cy")
+mesh = SubResource("PlaneMesh_d2df0")
 
 [node name="(0, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -96)
-mesh = SubResource("PlaneMesh_elc3k")
+mesh = SubResource("PlaneMesh_ub51u")
 
 [node name="(0, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -64)
-mesh = SubResource("PlaneMesh_ftnr4")
+mesh = SubResource("PlaneMesh_h2fqa")
 
 [node name="(0, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -32)
-mesh = SubResource("PlaneMesh_mxiuv")
+mesh = SubResource("PlaneMesh_kx4lb")
 
 [node name="(0, 0, 0)" type="MeshInstance3D" parent="Ocean"]
-mesh = SubResource("PlaneMesh_ulndo")
+mesh = SubResource("PlaneMesh_fww5f")
 
 [node name="(0, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 32)
-mesh = SubResource("PlaneMesh_u82ky")
+mesh = SubResource("PlaneMesh_0yab8")
 
 [node name="(0, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 64)
-mesh = SubResource("PlaneMesh_j1chw")
+mesh = SubResource("PlaneMesh_1cdam")
 
 [node name="(0, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 96)
-mesh = SubResource("PlaneMesh_t74bs")
+mesh = SubResource("PlaneMesh_6cis1")
 
 [node name="(0, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 128)
-mesh = SubResource("PlaneMesh_5afx0")
+mesh = SubResource("PlaneMesh_htpes")
 
 [node name="(32, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, -128)
-mesh = SubResource("PlaneMesh_5r6p6")
+mesh = SubResource("PlaneMesh_l71le")
 
 [node name="(32, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, -96)
-mesh = SubResource("PlaneMesh_5do7r")
+mesh = SubResource("PlaneMesh_yclxb")
 
 [node name="(32, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, -64)
-mesh = SubResource("PlaneMesh_gvg7g")
+mesh = SubResource("PlaneMesh_f4ueq")
 
 [node name="(32, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, -32)
-mesh = SubResource("PlaneMesh_v4b7t")
+mesh = SubResource("PlaneMesh_v2yel")
 
 [node name="(32, 0, 0)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 0)
-mesh = SubResource("PlaneMesh_qm63e")
+mesh = SubResource("PlaneMesh_d5mr7")
 
 [node name="(32, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 32)
-mesh = SubResource("PlaneMesh_dsvmr")
+mesh = SubResource("PlaneMesh_r75ws")
 
 [node name="(32, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 64)
-mesh = SubResource("PlaneMesh_2kpjq")
+mesh = SubResource("PlaneMesh_11njs")
 
 [node name="(32, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 96)
-mesh = SubResource("PlaneMesh_kfcqt")
+mesh = SubResource("PlaneMesh_3lubp")
 
 [node name="(32, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 128)
-mesh = SubResource("PlaneMesh_mm2b1")
+mesh = SubResource("PlaneMesh_pfjun")
 
 [node name="(64, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, -128)
-mesh = SubResource("PlaneMesh_lgj8m")
+mesh = SubResource("PlaneMesh_e28nv")
 
 [node name="(64, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, -96)
-mesh = SubResource("PlaneMesh_4fols")
+mesh = SubResource("PlaneMesh_tnhfi")
 
 [node name="(64, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, -64)
-mesh = SubResource("PlaneMesh_766di")
+mesh = SubResource("PlaneMesh_2jok1")
 
 [node name="(64, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, -32)
-mesh = SubResource("PlaneMesh_y2dph")
+mesh = SubResource("PlaneMesh_2u63d")
 
 [node name="(64, 0, 0)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 0)
-mesh = SubResource("PlaneMesh_ak72g")
+mesh = SubResource("PlaneMesh_7itar")
 
 [node name="(64, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 32)
-mesh = SubResource("PlaneMesh_o47qc")
+mesh = SubResource("PlaneMesh_aw24a")
 
 [node name="(64, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 64)
-mesh = SubResource("PlaneMesh_sgr4j")
+mesh = SubResource("PlaneMesh_h3m7j")
 
 [node name="(64, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 96)
-mesh = SubResource("PlaneMesh_u5a2m")
+mesh = SubResource("PlaneMesh_jbo4g")
 
 [node name="(64, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 0, 128)
-mesh = SubResource("PlaneMesh_37i1t")
+mesh = SubResource("PlaneMesh_fk5hg")
 
 [node name="(96, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, -128)
-mesh = SubResource("PlaneMesh_gsd7q")
+mesh = SubResource("PlaneMesh_72kuc")
 
 [node name="(96, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, -96)
-mesh = SubResource("PlaneMesh_jrk06")
+mesh = SubResource("PlaneMesh_2qiii")
 
 [node name="(96, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, -64)
-mesh = SubResource("PlaneMesh_pads7")
+mesh = SubResource("PlaneMesh_jgg5y")
 
 [node name="(96, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, -32)
-mesh = SubResource("PlaneMesh_qvu6v")
+mesh = SubResource("PlaneMesh_bxvu1")
 
 [node name="(96, 0, 0)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, 0)
-mesh = SubResource("PlaneMesh_hey4t")
+mesh = SubResource("PlaneMesh_01bct")
 
 [node name="(96, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, 32)
-mesh = SubResource("PlaneMesh_bcgvu")
+mesh = SubResource("PlaneMesh_5u3hb")
 
 [node name="(96, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, 64)
-mesh = SubResource("PlaneMesh_o422t")
+mesh = SubResource("PlaneMesh_nws4w")
 
 [node name="(96, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, 96)
-mesh = SubResource("PlaneMesh_s1m8d")
+mesh = SubResource("PlaneMesh_q4cfp")
 
 [node name="(96, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 0, 128)
-mesh = SubResource("PlaneMesh_lxja3")
+mesh = SubResource("PlaneMesh_y8k7y")
 
 [node name="(128, 0, -128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, -128)
-mesh = SubResource("PlaneMesh_xly6v")
+mesh = SubResource("PlaneMesh_d0t8d")
 
 [node name="(128, 0, -96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, -96)
-mesh = SubResource("PlaneMesh_670sr")
+mesh = SubResource("PlaneMesh_d5t0v")
 
 [node name="(128, 0, -64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, -64)
-mesh = SubResource("PlaneMesh_ny1wk")
+mesh = SubResource("PlaneMesh_ckxn1")
 
 [node name="(128, 0, -32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, -32)
-mesh = SubResource("PlaneMesh_65ck1")
+mesh = SubResource("PlaneMesh_di1kh")
 
 [node name="(128, 0, 0)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, 0)
-mesh = SubResource("PlaneMesh_a6udk")
+mesh = SubResource("PlaneMesh_a6ahj")
 
 [node name="(128, 0, 32)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, 32)
-mesh = SubResource("PlaneMesh_46mir")
+mesh = SubResource("PlaneMesh_dv5jn")
 
 [node name="(128, 0, 64)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, 64)
-mesh = SubResource("PlaneMesh_a77hd")
+mesh = SubResource("PlaneMesh_2qhpa")
 
 [node name="(128, 0, 96)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, 96)
-mesh = SubResource("PlaneMesh_e2svl")
+mesh = SubResource("PlaneMesh_ij2u7")
 
 [node name="(128, 0, 128)" type="MeshInstance3D" parent="Ocean"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 0, 128)
-mesh = SubResource("PlaneMesh_0ebsu")
+mesh = SubResource("PlaneMesh_ifif5")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.34753, 0)
+[node name="Ship" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+mass = 100.0
+script = ExtResource("6_mg5o3")
+bouyancyPower = 1.5
+bouyancyMultiplier = 1000.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ship"]
 mesh = SubResource("BoxMesh_pshwd")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ship"]
+shape = SubResource("BoxShape3D_cfhsy")
+
+[node name="Probe" type="Node3D" parent="Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, -0.5, -0.8)
+script = ExtResource("7_i05ol")
+
+[node name="Probe2" type="Node3D" parent="Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, -0.5, 0.8)
+script = ExtResource("7_i05ol")
+
+[node name="Probe7" type="Node3D" parent="Ship"]
+transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, -1.27028, -0.382826, -0.788246)
+script = ExtResource("7_i05ol")
+
+[node name="Probe8" type="Node3D" parent="Ship"]
+transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, -1.12972, -0.617174, 0.788246)
+script = ExtResource("7_i05ol")
+
+[node name="Probe9" type="Node3D" parent="Ship"]
+transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, 0, -0.382826, -0.788246)
+script = ExtResource("7_i05ol")
+
+[node name="Probe10" type="Node3D" parent="Ship"]
+transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, 0, -0.617174, 0.788246)
+script = ExtResource("7_i05ol")
+
+[node name="Probe3" type="Node3D" parent="Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, -0.5, -0.8)
+script = ExtResource("7_i05ol")
+
+[node name="Probe4" type="Node3D" parent="Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, -0.5, 0.8)
+script = ExtResource("7_i05ol")
+
+[node name="Probe5" type="Node3D" parent="Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -0.5, -0.8)
+script = ExtResource("7_i05ol")
+
+[node name="Probe6" type="Node3D" parent="Ship"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -0.5, 0.8)
+script = ExtResource("7_i05ol")
