@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://addons/MarchingCubes/MarchingCubes.tscn" id="2_spxkd"]
 [ext_resource type="Script" path="res://addons/WaterSystem/components/Ocean.cs" id="3_yj8kt"]
 [ext_resource type="Shader" path="res://addons/WaterSystem/shaders/Gerstner.gdshader" id="4_p13yi"]
-[ext_resource type="Script" path="res://addons/WaterSystem/components/BuoyancyBody.cs" id="6_mg5o3"]
+[ext_resource type="Script" path="res://Scripts/ShipController.cs" id="5_4o7tr"]
 [ext_resource type="Script" path="res://addons/WaterSystem/components/BuoyancyProbe.cs" id="7_i05ol"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_iqxmp"]
@@ -542,34 +542,13 @@ subdivide_width = 8
 subdivide_depth = 8
 
 [sub_resource type="BoxMesh" id="BoxMesh_pshwd"]
-size = Vector3(5, 1, 2)
+size = Vector3(5, 1, 3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cfhsy"]
-size = Vector3(5, 1, 2)
+size = Vector3(5, 1, 3)
 
 [node name="Root" type="WorldEnvironment"]
 environment = ExtResource("1_s0w40")
-
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.200769, 2.57024, 12.9716)
-current = true
-script = ExtResource("1_ilr4a")
-Speed = 8.0
-Sensitivity = 2.0
-
-[node name="Light" type="SpotLight3D" parent="Camera3D"]
-light_energy = 5.0
-shadow_enabled = true
-distance_fade_begin = 75.0
-distance_fade_shadow = 60.0
-distance_fade_length = 25.0
-spot_range = 15.0
-spot_attenuation = 1.36604
-spot_angle = 35.0
-
-[node name="OmniLight3D" type="OmniLight3D" parent="Camera3D"]
-light_energy = 0.5
-omni_range = 50.0
 
 [node name="Sun_Light" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.21454, -0.914975, 0.341751, -0.763427, 0.0611579, 0.642992, -0.609222, -0.398849, -0.685396, 0, 2, 0)
@@ -578,7 +557,7 @@ shadow_enabled = true
 sky_mode = 1
 
 [node name="MarchingCubes" parent="." node_paths=PackedStringArray("trackedNode") instance=ExtResource("2_spxkd")]
-trackedNode = NodePath("../Camera3D")
+trackedNode = NodePath("../Ship/Camera3D")
 
 [node name="Ocean" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 17.42)
@@ -945,9 +924,30 @@ mesh = SubResource("PlaneMesh_ifif5")
 [node name="Ship" type="RigidBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
 mass = 100.0
-script = ExtResource("6_mg5o3")
-bouyancyPower = 1.5
+script = ExtResource("5_4o7tr")
+Thrust = 1000.0
 bouyancyMultiplier = 1000.0
+
+[node name="Camera3D" type="Camera3D" parent="Ship"]
+transform = Transform3D(-4.24699e-08, 0.236635, -0.971599, 1.03436e-08, 0.971599, 0.236635, 1, 8.88178e-16, -4.37114e-08, -5.98816, 2.72898, 0)
+current = true
+script = ExtResource("1_ilr4a")
+Speed = 8.0
+Sensitivity = 2.0
+
+[node name="Light" type="SpotLight3D" parent="Ship/Camera3D"]
+light_energy = 5.0
+shadow_enabled = true
+distance_fade_begin = 75.0
+distance_fade_shadow = 60.0
+distance_fade_length = 25.0
+spot_range = 15.0
+spot_attenuation = 1.36604
+spot_angle = 35.0
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Ship/Camera3D"]
+light_energy = 0.5
+omni_range = 50.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ship"]
 mesh = SubResource("BoxMesh_pshwd")
@@ -957,41 +957,41 @@ skeleton = NodePath("../..")
 shape = SubResource("BoxShape3D_cfhsy")
 
 [node name="Probe" type="Node3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, -0.5, -0.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, -0.5, -1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe2" type="Node3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, -0.5, 0.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, -0.5, 1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe7" type="Node3D" parent="Ship"]
-transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, -1.27028, -0.382826, -0.788246)
+transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, -1.27, -0.383, -1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe8" type="Node3D" parent="Ship"]
-transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, -1.12972, -0.617174, 0.788246)
+transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, -1.13, -0.617, 1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe9" type="Node3D" parent="Ship"]
-transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, 0, -0.382826, -0.788246)
+transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, 0, -0.383, -1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe10" type="Node3D" parent="Ship"]
-transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, 0, -0.617174, 0.788246)
+transform = Transform3D(0.712444, 0.696209, 0.0878474, -0.682077, 0.716463, -0.146467, -0.164911, 0.0444307, 0.985307, 0, -0.617, 1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe3" type="Node3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, -0.5, -0.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, -0.5, -1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe4" type="Node3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, -0.5, 0.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, -0.5, 1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe5" type="Node3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -0.5, -0.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -0.5, -1.4)
 script = ExtResource("7_i05ol")
 
 [node name="Probe6" type="Node3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -0.5, 0.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -0.5, 1.4)
 script = ExtResource("7_i05ol")

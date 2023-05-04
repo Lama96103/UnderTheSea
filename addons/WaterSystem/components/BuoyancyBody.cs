@@ -5,7 +5,7 @@ namespace WaterSystem
 {
     public partial class BuoyancyBody : RigidBody3D
     {
-        [Export] private float bouyancyPower = 1;
+        [Export] private float bouyancyPower = 1.5f;
         [Export] private float bouyancyMultiplier = 1;
         [Export] private float submergedDragLinear = 0.05f;
         [Export] private float submergedDragAngular = 0.1f;
@@ -23,7 +23,9 @@ namespace WaterSystem
             }
         }
 
-        public override void _PhysicsProcess(double delta)
+
+
+        public override void _IntegrateForces(PhysicsDirectBodyState3D state)
         {
             Vector3 gravity = new Vector3(0, -9.87f, 0);
             int submerged_probes = 0;
@@ -38,20 +40,20 @@ namespace WaterSystem
                     isSubmerged = true;
                     submerged_probes++;
                     float multiplier = bouyancyMultiplier * probe.bouyancyMultiplier;
-                    Vector3 force = -gravity * buoyancy * multiplier * (float)delta;
-                    this.ApplyForce(force, probe.GlobalPosition - this.GlobalPosition);
+                    Vector3 force = -gravity * buoyancy * multiplier * (float)state.Step;
+                    state.ApplyForce(force, probe.GlobalPosition - this.GlobalPosition);
                 }
                     
-            }    
-        }
+            }  
 
-        public override void _IntegrateForces(PhysicsDirectBodyState3D state)
-        {
             if(isSubmerged)
             {
                 state.LinearVelocity *= 1.0f - submergedDragLinear;
                 state.AngularVelocity *= 1.0f - submergedDragAngular;
             }
+            OnIntegrateForces(state);
         }
+
+        protected virtual void OnIntegrateForces(PhysicsDirectBodyState3D state){}
     }
 }
