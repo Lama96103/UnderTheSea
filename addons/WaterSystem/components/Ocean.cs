@@ -146,7 +146,7 @@ namespace WaterSystem
 
             if(camera != null)
             {
-                this.Position = new Vector3(camera.GlobalPosition.X, 0, camera.GlobalPosition.Z);
+                //this.Position = new Vector3(camera.GlobalPosition.X, 0, camera.GlobalPosition.Z);
 
                 float height = GetWaveHeight(camera.GlobalPosition);
 
