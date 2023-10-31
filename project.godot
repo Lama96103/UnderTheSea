@@ -18,16 +18,12 @@ ResourceScriptDirectories=["res://addons/WaterSystem"]
 
 config/name="Under The Sea"
 run/main_scene="res://Scenes/Root.tscn"
-config/features=PackedStringArray("4.0", "C#", "Forward Plus")
+config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [dotnet]
 
 project/assembly_name="Under The Sea"
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/tessarakkt.oceanfft/plugin.cfg")
 
 [input]
 
