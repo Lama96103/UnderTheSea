@@ -32,7 +32,7 @@ namespace WaterSystem
 	        isSubmerged = false;
             foreach(BuoyancyProbe probe in probes)
             {
-                float depth = (float)Mathf.Clamp((probe.GlobalPosition.Y - Ocean.Instance.GetWaveHeight(probe.GlobalPosition)), -10000.0, 0.0);
+                float depth = (float)Mathf.Clamp((probe.GlobalPosition.Y - OceanSystem.Instance.GetWaveHeight(probe.GlobalPosition)), -10000.0, 0.0);
                 float buoyancy = Mathf.Pow(Mathf.Abs(depth), bouyancyPower);
                 
                 if (depth < 0.0)

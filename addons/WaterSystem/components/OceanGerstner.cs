@@ -4,9 +4,8 @@ using Godot;
 namespace WaterSystem
 {
     [Tool]
-    public partial class Ocean : Node3D
+    public partial class OceanGerstner : Node3D, OceanSystem
     {
-        public static Ocean Instance = null;
         [Export] private float ChunkSize = 50;
         [Export] private float[] Lod = new float[]{2,1,0.5f};
         private ShaderMaterial oceanMaterial;
@@ -114,7 +113,7 @@ namespace WaterSystem
                 Cleanup();
                 GenerateMesh();
 
-                Ocean.Instance = this; 
+                OceanSystem.Instance = this;
             }
         }
 
@@ -300,6 +299,7 @@ namespace WaterSystem
             oceanMaterial.SetShaderParameter("waveSteepness", curWaveSteepness);
         }
 
-    
+       
+
     }
 }
