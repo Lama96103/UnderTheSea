@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://8p48o2set6yo"
+path="res://.godot/imported/FFTVertical.glsl-56ac6f3a0f91625ddb3cfb5f5abfeaf1.res"
+
+[deps]
+
+source_file="res://addons/WaterSystem/shaders/FFTVertical.glsl"
+dest_files=["res://.godot/imported/FFTVertical.glsl-56ac6f3a0f91625ddb3cfb5f5abfeaf1.res"]
+
+[params]
+

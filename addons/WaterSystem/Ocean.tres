@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://dpq0q878yxl6y"]
+
+[ext_resource type="Shader" path="res://addons/WaterSystem/shaders/SurfaceVisual.gdshader" id="1_qcdl7"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_qcdl7")
