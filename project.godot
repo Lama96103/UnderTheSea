@@ -17,7 +17,7 @@ ResourceScriptDirectories=["res://addons/WaterSystem"]
 [application]
 
 config/name="Under The Sea"
-run/main_scene="res://Scenes/Root.tscn"
+run/main_scene="res://Scenes/OceanFFT.tscn"
 config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 

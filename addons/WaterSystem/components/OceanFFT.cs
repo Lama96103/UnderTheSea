@@ -1,17 +1,19 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Security.AccessControl;
 using Godot;
 using Godot.NativeInterop;
 
 namespace WaterSystem
 {
-    [Tool]
+    
     public partial class OceanFFT : Node3D, OceanSystem
     {
         private const float GoldenRatio = 1.618033989f;
         private const int WorkGroupDim = 32;
-        private const int uniformSet = 0;
+        private const int UniformSet = 0;
         private enum Binding{
             Settings = 0, InitialSpectrum = 20, Spectrum = 21, Ping = 25, Pong = 26, Input = 27, Output = 28, Displacement = 30
         }
@@ -23,13 +25,22 @@ namespace WaterSystem
         [Export] private Godot.Collections.Array<Vector2> cascadeRanges = new Godot.Collections.Array<Vector2>() {new Vector2(0.0f, 0.03f), new Vector2(0.03f, 0.15f), new Vector2(0.15f, 1.0f)};
         [Export] private Godot.Collections.Array<float> cascadeScales = new Godot.Collections.Array<float>() {GoldenRatio * 2.0f, GoldenRatio, 0.5f};
         [Export] private float choppiness = 1.5f;
+        [Export] private float windDirection = 0;
+        [Export] private float waveScrollSpeed = 1;
         [Export] private ShaderMaterial material = GD.Load<ShaderMaterial>("res://addons/WaterSystem/Ocean.tres");
+        [Export] private float timeScale = 1;
+        [Export] private bool isSimulationEnabled = true;
+        [Export] private int simulationFrameskip = 0;
+        [Export] private int heightmapSyncFrameskip = -1;
 
         #endregion
 
-
+        private int frameskip = 0;
+        private int heightmapskip = 0;
         private Vector2 waveVector = new Vector2(300.0f, 0.0f);
+        private Vector2 windUVOffset = new Vector2();
         private float uvScale = 0.00390625f;
+        private float accumulatedDelta = 0;
 
 
 
@@ -100,6 +111,43 @@ namespace WaterSystem
             if(!Engine.IsEditorHint())
             {
                 OceanSystem.Instance = this;
+            }
+
+            GD.Randomize();
+            GD.Print("Init Ocean started");
+            Init();
+            GD.Print("Init Ocean finished");
+        }
+
+        public override void _Process(double delta)
+        {
+            if (isSimulationEnabled)
+            {
+                accumulatedDelta += (float)delta;
+
+                windUVOffset += new Vector2(Mathf.Cos(windDirection), Mathf.Sin(windDirection)) * waveScrollSpeed * (float)delta;
+                material.SetShaderParameter("wind_uv_offset", windUVOffset);
+
+                if(simulationFrameskip > 0)
+                {
+                    frameskip++;
+                    if(frameskip <= simulationFrameskip) return;
+                    else frameskip = 0;
+                }
+
+                bool syncHeightmap = heightmapSyncFrameskip != -1;
+                if(heightmapSyncFrameskip > 0)
+                {
+                    heightmapskip++;
+                    if(heightmapskip <= heightmapSyncFrameskip) syncHeightmap = false;
+                    else{
+                        syncHeightmap = true;
+                        heightmapskip = 0;
+                    }
+                }
+
+                Simulate(accumulatedDelta, syncHeightmap);
+                accumulatedDelta = 0;
             }
         }
 
@@ -310,9 +358,220 @@ namespace WaterSystem
             subPongUniform.AddId(subPongTex);
         }
 
+        private void Simulate(float deltaTime, bool syncHeightmap)
+        {
+            Rid uniformSet;
+            long computeList;
+            byte[] settingsByte;
+
+            	
+	        // ## Iterate & Execute Cascades
+	        // ##########################################################################
+            for(int cascade = 0; cascade < cascadeRanges.Count; cascade++)
+            {
+                // #### Update Initial Spectrum
+                // ########################################################################
+                // ## Only executed on first frame, or if Wind, FFT Resolution, or
+                // ## Horizontal Dimension inputs are changed, as the output is constant
+                // ## for a given set of inputs. The Initial Spectrum is cached in VRAM. It
+                // ## is not returned to CPU RAM.
+                if(isInitialSpectrumChanged)
+                {
+                    // Update Settings Buffer
+                    settingsByte = PackInitialSpectrumSettings(cascade);
+                    if(renDevice.BufferUpdate(initialSpectrumSettingsBufferCascade[cascade], 0, (uint)settingsByte.Length, settingsByte) != Error.Ok)
+                        GD.Print("error updating initial spectrum settings buffer");
+
+                    // Build Uniform Set
+                    uniformSet = renDevice.UniformSetCreate(new Godot.Collections.Array<RDUniform>(){
+                        initialSpectrumSettingsUniformCascade[cascade], initialSpectrumUnifromCascade[cascade]
+                    }, initialSpectrumShader, UniformSet);
+
+                    // Create Compute List
+                    computeList = renDevice.ComputeListBegin();
+                    renDevice.ComputeListBindComputePipeline(computeList, initialSpectrumPipeline);
+                    renDevice.ComputeListBindUniformSet(computeList, uniformSet, UniformSet);
+                    renDevice.ComputeListDispatch(computeList, (uint)(fftResolution / WorkGroupDim), (uint)(fftResolution / WorkGroupDim), 1);
+                    renDevice.ComputeListEnd();
+
+                    renDevice.Barrier(RenderingDevice.BarrierMask.Compute);
+                    renDevice.FreeRid(uniformSet);
+                }
+                
+                // Prevent this from running again until the Wind, FFT Resolution, or
+                // Horizontal Dimension inputs are changed. The condition ensures it
+                // runs for all cascades.
+                if (cascade == cascadeRanges.Count - 1)
+                    isInitialSpectrumChanged = false;
+
+                // ## Execute Phase Shader; Updates Ping Pong Buffers
+                // ######################################################################
+                // Leave the textures in place in VRAM, and just switch the binding points.
+                if(isPingPhase)
+                {
+                    pingUniformCascade[cascade].Binding = (int)Binding.Ping;
+                    pongUniformCascade[cascade].Binding = (int)Binding.Pong;
+                }
+                else
+                {
+                    pingUniformCascade[cascade].Binding = (int)Binding.Pong;
+                    pongUniformCascade[cascade].Binding = (int)Binding.Ping;
+                }
+
+                // Update Settings Buffer
+                settingsByte = PackPhaseSettings(deltaTime * timeScale, cascade);
+                if(renDevice.BufferUpdate(phaseSettingsBuffer, 0, (uint)settingsByte.Length, settingsByte) != Error.Ok)
+                    GD.Print("error updating phase settings buffer");
+
+                // Build Uniform Set
+                uniformSet = renDevice.UniformSetCreate(new Godot.Collections.Array<RDUniform>(){
+                    phaseSettingsUniform, pingUniformCascade[cascade], pongUniformCascade[cascade]
+                }, phaseShader, UniformSet);
+
+                // Create Compute List
+                computeList = renDevice.ComputeListBegin();
+                renDevice.ComputeListBindComputePipeline(computeList, phasePipeline);
+                renDevice.ComputeListBindUniformSet(computeList, uniformSet, UniformSet);
+                renDevice.ComputeListDispatch(computeList, (uint)(fftResolution / WorkGroupDim), (uint)(fftResolution / WorkGroupDim), 1);
+                renDevice.ComputeListEnd();
+
+                renDevice.Barrier(RenderingDevice.BarrierMask.Compute);
+
+                renDevice.FreeRid(uniformSet);
+
+                // ## Execute Spectrum Shader Cascades
+		        // ######################################################################
+                // Update Settings Buffer
+                settingsByte = PackSpectrumSettings(cascade);
+                if(renDevice.BufferUpdate(spectrumSettingsBuffer, 0, (uint)settingsByte.Length, settingsByte) != Error.Ok)
+                    GD.Print("error updating spectrum settings buffer");
+
+                // Ensure the Spectrum texture binding is correct from previous frames.
+		        // It gets changed later on in _simulate().
+                spectrumUniformCascade[cascade].Binding = (int)Binding.Spectrum;
+
+                // Build Uniform Set
+                uniformSet = renDevice.UniformSetCreate(new Godot.Collections.Array<RDUniform>(){
+                    spectrumSettingsUniform, initialSpectrumSettingsUniformCascade[cascade], spectrumUniformCascade[cascade],
+                    pingUniformCascade[cascade], pongUniformCascade[cascade]
+                }, spectrumShader, UniformSet);
+
+                // Create Compute List
+                computeList = renDevice.ComputeListBegin();
+                renDevice.ComputeListBindComputePipeline(computeList, spectrumPipeline);
+                renDevice.ComputeListBindUniformSet(computeList, uniformSet, UniformSet);
+                renDevice.ComputeListDispatch(computeList, (uint)(fftResolution / WorkGroupDim), (uint)(fftResolution / WorkGroupDim), 1);
+                renDevice.ComputeListEnd();
+
+                renDevice.Barrier(RenderingDevice.BarrierMask.Compute);
+
+                renDevice.FreeRid(uniformSet);
 
 
+                // ## Execute Horizontal FFT Shader Cascades
+                // ######################################################################
+                bool isSubPingPhase = true;
+                int p = 1;
 
+                while(p < fftResolution)
+                {
+                    // Leave the textures in place in VRAM, and just switch the binding
+			        // points.
+
+                    if(isSubPingPhase)
+                    {
+                        spectrumUniformCascade[cascade].Binding = (int)Binding.Input;
+                        subPongUniform.Binding = (int)Binding.Output;
+                    }
+                    else
+                    {
+                        spectrumUniformCascade[cascade].Binding = (int)Binding.Output;
+                        subPongUniform.Binding = (int)Binding.Input;
+                    }
+
+                    // Update Settings Buffer
+                    settingsByte = PackFFTSettings(p);
+                    if(renDevice.BufferUpdate(fftSettingsBuffer, 0, (uint)settingsByte.Length, settingsByte) != Error.Ok)
+                        GD.Print("error updating horizontal FFT settings buffer");
+
+                    // Build Uniform Set
+                    uniformSet = renDevice.UniformSetCreate(new Godot.Collections.Array<RDUniform>(){
+                        fftSettingsUniform, subPongUniform, spectrumUniformCascade[cascade]
+                    }, fftHorizontalShader, UniformSet);
+
+                     // Create Compute List
+                    computeList = renDevice.ComputeListBegin();
+                    renDevice.ComputeListBindComputePipeline(computeList, fftHorizontalPipeline);
+                    renDevice.ComputeListBindUniformSet(computeList, uniformSet, UniformSet);
+                    renDevice.ComputeListDispatch(computeList, (uint)fftResolution, 1, 1);
+                    renDevice.ComputeListEnd();
+
+                    renDevice.Barrier(RenderingDevice.BarrierMask.Compute);
+
+                    renDevice.FreeRid(uniformSet);
+
+                    p = p << 1;
+                    isSubPingPhase = !isSubPingPhase;
+                }
+
+                // ## Execute Vertical FFT Shader Cascades
+		        // ######################################################################
+                p = 1;
+                while(p < fftResolution)
+                {
+                    // Leave the textures in place in VRAM, and just switch the binding
+			        // points.
+
+                    if(isSubPingPhase)
+                    {
+                        spectrumUniformCascade[cascade].Binding = (int)Binding.Input;
+                        subPongUniform.Binding = (int)Binding.Output;
+                    }
+                    else
+                    {
+                        spectrumUniformCascade[cascade].Binding = (int)Binding.Output;
+                        subPongUniform.Binding = (int)Binding.Input;
+                    }
+
+                    // Update Settings Buffer
+                    settingsByte = PackFFTSettings(p);
+                    if(renDevice.BufferUpdate(fftSettingsBuffer, 0, (uint)settingsByte.Length, settingsByte) != Error.Ok)
+                        GD.Print("error updating vertical FFT settings buffer");
+
+                    // Build Uniform Set
+                    uniformSet = renDevice.UniformSetCreate(new Godot.Collections.Array<RDUniform>(){
+                        fftSettingsUniform, subPongUniform, spectrumUniformCascade[cascade]
+                    }, fftVerticalShader, UniformSet);
+
+                    // Create Compute List
+                    computeList = renDevice.ComputeListBegin();
+                    renDevice.ComputeListBindComputePipeline(computeList, fftVerticalPipeline);
+                    renDevice.ComputeListBindUniformSet(computeList, uniformSet, UniformSet);
+                    renDevice.ComputeListDispatch(computeList, (uint)fftResolution, 1, 1);
+                    renDevice.ComputeListEnd();
+
+                    renDevice.Barrier(RenderingDevice.BarrierMask.Compute);
+
+                    renDevice.FreeRid(uniformSet);
+
+                    p = p << 1;
+                    isSubPingPhase = !isSubPingPhase;
+                }
+
+                // Retrieve the displacement map from the Spectrum texture, and store it
+		        // CPU side for use by buoyancy and wave interaction systems.
+                if(syncHeightmap)
+                {
+                    wavesImageCascade[cascade].SetData(fftResolution, fftResolution, false, Image.Format.Rgf, renDevice.TextureGetData(spectrumTexCascade[cascade], 0));
+                }
+            }
+
+            // This needs to get updated outside the cascade iteration loop
+            isPingPhase = !isPingPhase;
+        }
+
+
+        #region Pack Shader Settings
         private byte[] PackFFTSettings(int subSeqCount)
         {
             return GD.VarToBytes(new int[]{fftResolution, subSeqCount});
@@ -339,6 +598,7 @@ namespace WaterSystem
             settingsByte = Combine(settingsByte, GD.VarToBytes(new Vector2[]{waveVector}));
             return settingsByte;
         }
+        #endregion
         
         public float GetWaveHeight(Vector3 position)
         {
