@@ -1,17 +1,26 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://dpq0q878yxl6y"]
+[gd_resource type="ShaderMaterial" load_steps=5 format=3 uid="uid://dpq0q878yxl6y"]
 
 [ext_resource type="Shader" path="res://addons/WaterSystem/shaders/SurfaceVisual.gdshader" id="1_qcdl7"]
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_621nl"]
+texture_rd_rid = RID(36206917902673320)
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_klw42"]
+texture_rd_rid = RID(36206930787573585)
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_5gvyy"]
+texture_rd_rid = RID(36206943672475445)
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_qcdl7")
 shader_parameter/normal_factor = 1.0
-shader_parameter/cascade_uv_scales = null
+shader_parameter/cascade_uv_scales = [3.23607, 1.61803, 0.5]
 shader_parameter/uv_scale = 0.00195312
-shader_parameter/wind_uv_offset = Vector2(0, 0)
-shader_parameter/view_distance_max = 16000.0
+shader_parameter/wind_uv_offset = Vector2(14.2556, -0.279934)
+shader_parameter/view_distance_max = 4000.0
 shader_parameter/vertex_resolution = 256.0
-shader_parameter/cascade_displacements = null
+shader_parameter/cascade_displacements = [SubResource("Texture2DRD_621nl"), SubResource("Texture2DRD_klw42"), SubResource("Texture2DRD_5gvyy")]
 shader_parameter/domain_warp_uv_scale = 6.25e-05
 shader_parameter/domain_warp_strength = 1500.0
 shader_parameter/planetary_curve_strength = 1e-06
@@ -26,10 +35,10 @@ shader_parameter/shallow_color = Color(0, 0.729412, 0.988235, 1)
 shader_parameter/fresnel_offset = 0.02
 shader_parameter/fresnel_strength = 0.0
 shader_parameter/fresnel_power = 5.0
-shader_parameter/fresnel_exposure = 0.03
+shader_parameter/fresnel_exposure = 0.01
 shader_parameter/fresnel_sky_color = Color(1.6, 4.8, 6.4, 1)
-shader_parameter/pbr_specular_strength = 0.1
-shader_parameter/pbr_specular_offset = 0.1
+shader_parameter/pbr_specular_strength = 0.5
+shader_parameter/pbr_specular_offset = 0.05
 shader_parameter/pbr_metallic_strength = 0.0
 shader_parameter/refraction_factor_min = 0.0
 shader_parameter/refraction_factor_max = 0.025
@@ -40,7 +49,7 @@ shader_parameter/refraction_depth_factor = 1e-05
 shader_parameter/sss_backlight_strength = 0.0125
 shader_parameter/sss_backlight_fov = 10.0
 shader_parameter/sss_backlight_depth = 15.0
-shader_parameter/sss_upwelling = 0.075
+shader_parameter/sss_upwelling = 0.05
 shader_parameter/sss_color = Color(0, 0.729412, 0.988235, 1)
 shader_parameter/foam_jacobian_limit = 0.5
 shader_parameter/foam_coverage = 0.1

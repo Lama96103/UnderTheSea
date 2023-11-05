@@ -8,20 +8,21 @@ using Godot;
 using Godot.NativeInterop;
 namespace WaterSystem;
 
+[Tool]
 public partial class QuadTree3D : Node3D
 {
     // Specifies the LOD level of the current quad. There will be X - 1 subquad
     // levels nested below this quad.
-    [Export(PropertyHint.Range, "0,1000000,1")] private int lodLevel = 2;
+    [Export(PropertyHint.Range, "-1,1000000,1")] private int lodLevel = -1;
 
     // Horizontal size of the current quad.
-    [Export(PropertyHint.Range, "1.0,65535.0")] private float quadSize = 1024.0f;
+    [Export(PropertyHint.Range, "1.0,65535.0")] private float quadSize = 16384f;
 
     // Morph range for CDLOD geomorph between LOD levels.
-    [Export(PropertyHint.Range, "0.0,1.0, 0.001")] private float morphRange = 1024.0f;
+    [Export(PropertyHint.Range, "0.0,1.0, 0.001")] private float morphRange = 0.1f;
 
     // Vertex resolution of each of the quads in this tree.
-    [Export(PropertyHint.Range, "0,32000,1")] private int meshVertexResolution = 256;
+    [Export(PropertyHint.Range, "0,32000,1")] private int meshVertexResolution = 512;
 
     // Ranges for each LOD level. Accessed as ranges[lod_level].
     [Export] private Godot.Collections.Array<float> ranges = new Godot.Collections.Array<float>() {512, 1024, 2048};
@@ -37,9 +38,9 @@ public partial class QuadTree3D : Node3D
 
     // Whether the current quad is the root quad in the tree. Initializes all nested
     // subquads on ready.
-    bool isRootQuad = true;
+    [Export] private bool isRootQuad = true;
     // If this is true, the LOD system will be paused in its current state.
-    private bool pauseCull = false;
+    [Export] private bool pauseCull = false;
     // The cull box that encloses this quad.
     private Aabb cullBox;
 
@@ -52,21 +53,40 @@ public partial class QuadTree3D : Node3D
     private VisibleOnScreenNotifier3D visibilityDetector;
     private Godot.Collections.Array<QuadTree3D> subQuads = new Godot.Collections.Array<QuadTree3D>();
 
+	private static int quadCount = 0;
+	private bool isInit = false;
+
     public override void _Ready()
     {
-        Node3D subQuadNode;
+		if(lodLevel >= 0) Init();
+    }
+
+
+	public void Init()
+	{
+		if(quadCount > 10000 || isInit) return;
+		Node3D subQuadNode;
 
         if(isRootQuad)
         {
+			quadCount = 0;
             // Load self to instantiate subquads with
 		    // This can't currently be preloaded due to an engine bug
 		    // https://github.com/godotengine/godot/issues/70985
             quad = GD.Load<PackedScene>("res://addons/WaterSystem/components/QuadTree3D.tscn");
 
-	
+
+			
             // Set max view distance and fade range start
-            Camera3D camera = GetViewport().GetCamera3D();
-            material.SetShaderParameter("view_distance_max", camera.Far);
+			float cameraFar = 4000f; 
+			if(!Engine.IsEditorHint())
+			{
+				Camera3D camera = GetViewport().GetCamera3D();
+				cameraFar = camera.Far;
+			}
+
+			
+            material.SetShaderParameter("view_distance_max", cameraFar);
             material.SetShaderParameter("vertex_resolution", meshVertexResolution);
 
             // Initialize LOD meshes for each level
@@ -101,6 +121,7 @@ public partial class QuadTree3D : Node3D
         }
 
 		float offsetLength = quadSize * 0.25f;
+
 		meshInstance.Visible = false;
 		meshInstance.Mesh = lodMeshes[lodLevel];
 		meshInstance.MaterialOverride = material;
@@ -132,26 +153,36 @@ public partial class QuadTree3D : Node3D
 				newQuad.isRootQuad = false;
 				newQuad.material = material;
 
-				subQuadNode.AddChild(newQuad);
+				subQuadNode.CallDeferred("add_child", newQuad);
 				subQuads.Add(newQuad); 
+
+				//newQuad.CallDeferred("Init");
+
+				quadCount++;
 
 			}
 		}
 
 		
-
-
-
-    }
-
+		GD.Print("Total Quad Count " + quadCount);
+		isInit = true;
+	}
 	// Process mode is set to PROCESS_MODE_DISABLED for subquads, so only the root
 	// quad will run _process().
     public override void _Process(double delta)
     {
 		if(!pauseCull && Engine.GetFramesDrawn() % 2 == 0)
 		{
-			Camera3D camera = GetViewport().GetCamera3D();
-			LodSelect(camera.GlobalPosition);
+			if(Engine.IsEditorHint())
+			{
+				LodSelect(Vector3.Zero);
+			}
+			else
+			{
+				Camera3D camera = GetViewport().GetCamera3D();
+				LodSelect(camera.GlobalPosition);
+			}
+			
 		}
     }
 
@@ -161,6 +192,7 @@ public partial class QuadTree3D : Node3D
 	// cam_pos is the camera/player position in global coordinates.
 	private bool LodSelect(Vector3 cameraPos)
 	{
+		//if(!isInit) return false;
 		// Beginning at the root node of lowest LOD, and working towards the most
 		// detailed LOD 0.
 
@@ -173,13 +205,15 @@ public partial class QuadTree3D : Node3D
 			return false;
 		}
 
-		if(!visibilityDetector.IsOnScreen())
+		
+		if(!visibilityDetector.IsOnScreen() && !Engine.IsEditorHint())
 		{
 			// This quad is not on screen. Do not make it visible, and return true
 			// to mark the area as handled.
 			meshInstance.Visible = false;
 			return true;
 		}
+		
 
 		if(lodLevel == 0)
 		{

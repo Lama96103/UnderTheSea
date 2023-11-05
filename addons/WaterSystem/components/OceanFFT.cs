@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.AccessControl;
 using Godot;
 using Godot.NativeInterop;
@@ -9,6 +10,7 @@ using Godot.NativeInterop;
 namespace WaterSystem
 {
     
+    [Tool]
     public partial class OceanFFT : Node3D, OceanSystem
     {
         private const float GoldenRatio = 1.618033989f;
@@ -24,14 +26,48 @@ namespace WaterSystem
         
         [Export] private Godot.Collections.Array<Vector2> cascadeRanges = new Godot.Collections.Array<Vector2>() {new Vector2(0.0f, 0.03f), new Vector2(0.03f, 0.15f), new Vector2(0.15f, 1.0f)};
         [Export] private Godot.Collections.Array<float> cascadeScales = new Godot.Collections.Array<float>() {GoldenRatio * 2.0f, GoldenRatio, 0.5f};
-        [Export] private float choppiness = 1.5f;
-        [Export] private float windDirection = 0;
-        [Export] private float waveScrollSpeed = 1;
+     
         [Export] private ShaderMaterial material = GD.Load<ShaderMaterial>("res://addons/WaterSystem/Ocean.tres");
         [Export] private float timeScale = 1;
         [Export] private bool isSimulationEnabled = true;
         [Export] private int simulationFrameskip = 0;
         [Export] private int heightmapSyncFrameskip = -1;
+
+
+        [ExportGroup("Wave Settings")]
+        [Export] private float WindSpeed {
+            get
+            {
+                return waveVector.Length();
+            }
+            set
+            {
+                if(waveVector.Length() == 0) waveVector = Vector2.Right;
+                waveVector = waveVector.Normalized() * value;
+            }
+        }
+        [Export] private float choppiness = 0.5f;
+        private float windDirection = 0;
+        [Export] private float WindDirection
+        {
+            get
+            {
+                return Mathf.RadToDeg(windDirection);
+            }
+            set
+            {
+                float newValue = Mathf.Clamp(value, 0.0f, 360f);
+                windDirection = Mathf.DegToRad(newValue);
+            }
+        }
+
+        [Export] private float waveScrollSpeed = 0.1f;
+
+
+        [ExportGroup("Editor")]
+        
+        [Export] private bool Regenerate 
+        {get => false; set{isInitialSpectrumChanged = true; isSpectrumChanged = true;}}
 
         #endregion
 
@@ -93,17 +129,7 @@ namespace WaterSystem
 
 
 
-        public static byte[] Combine(params byte[][] arrays)
-        {
-            byte[] ret = new byte[arrays.Sum(x => x.Length)];
-            int offset = 0;
-            foreach (byte[] data in arrays)
-            {
-                Buffer.BlockCopy(data, 0, ret, offset, data.Length);
-                offset += data.Length;
-            }
-            return ret;
-        }
+        
 
 
         public override void _Ready()
@@ -114,9 +140,7 @@ namespace WaterSystem
             }
 
             GD.Randomize();
-            GD.Print("Init Ocean started");
             Init();
-            GD.Print("Init Ocean finished");
         }
 
         public override void _Process(double delta)
@@ -178,6 +202,8 @@ namespace WaterSystem
             fmtRGBA32f.Format = RenderingDevice.DataFormat.R32G32B32A32Sfloat;
             fmtRGBA32f.UsageBits = fmtR32f.UsageBits;
 
+            GD.Print("RD Texture Formats");
+
             /* #### Compile & Initialize Initial Spectrum Shader
             ############################################################################
             ## The Initial Spectrum texture is initialized empty. It will be generated
@@ -203,8 +229,8 @@ namespace WaterSystem
                 settingsBytes = PackInitialSpectrumSettings(i);
                 initialSpectrumSettingsBufferCascade[i] = renDevice.StorageBufferCreate((uint)settingsBytes.Length, settingsBytes);
                 initialSpectrumSettingsUniformCascade[i] = new RDUniform();
-                initialSpectrumSettingsUniformCascade[i].UniformType = RenderingDevice.UniformType.Image;
-                initialSpectrumSettingsUniformCascade[i].Binding = (int)Binding.InitialSpectrum;
+                initialSpectrumSettingsUniformCascade[i].UniformType = RenderingDevice.UniformType.StorageBuffer;
+                initialSpectrumSettingsUniformCascade[i].Binding = (int)Binding.Settings;
                 initialSpectrumSettingsUniformCascade[i].AddId(initialSpectrumSettingsBufferCascade[i]);
 
                 // Initialized empty, it will be generated on the first frame
@@ -213,7 +239,10 @@ namespace WaterSystem
 		        initialSpectrumUnifromCascade[i].UniformType =RenderingDevice.UniformType.Image;
 		        initialSpectrumUnifromCascade[i].Binding = (int)Binding.InitialSpectrum;
 		        initialSpectrumUnifromCascade[i].AddId(initialSpectrumTexCascade[i]);
+        
             }
+
+            GD.Print("Initial Spectrum");
 
             /*#### Compile & Initialize Phase Shader
 	        ############################################################################
@@ -239,6 +268,8 @@ namespace WaterSystem
 	        phaseSettingsUniform.Binding = (int)Binding.Settings;
 	        phaseSettingsUniform.AddId(phaseSettingsBuffer);
 
+            GD.Print("Phase");
+
             /*	#### Initialize Ping Pong Buffer Textures
             ############################################################################
             ## These act as the input and output buffers for the Phase shader.
@@ -254,13 +285,16 @@ namespace WaterSystem
             ##
             ## On first start up, Ping gets initialized with crafted random data. */
 
-            byte[] pingData = new byte[0];
-
-	        // The Ping buffer must be initialized with this crafted randomized data
-            for(int i = 0; i < fftResolution * fftResolution; i++)
+            float[] pingDataFloat = new float[fftResolution * fftResolution];
+            for(int i = 0; i < pingDataFloat.Length; i+= sizeof(float))
             {
-                pingData = Combine(pingData, GD.VarToBytes(GD.RandRange(0.0f, 1.0f) * 2.0f * Mathf.Pi));
+                pingDataFloat[i] = (float)(GD.RandRange(0.0f, 1.0f) * 2.0f * Mathf.Pi);
             }
+            byte[] pingData = new byte[pingDataFloat.Length * sizeof(float)];
+            Buffer.BlockCopy(pingDataFloat, 0, pingData, 0, pingData.Length);
+
+
+            GD.Print("Created Ping Buffer");
 
             for(int i = 0; i < cascadeRanges.Count; i++)
             {
@@ -280,6 +314,8 @@ namespace WaterSystem
                 pongUniformCascade[i].AddId(pongTexCascade[i]);
 
             }
+
+            GD.Print("Ping Pong");
 
             /*
             #### Compile & Initialize Spectrum Shader
@@ -309,7 +345,8 @@ namespace WaterSystem
             for(int i = 0; i < cascadeRanges.Count; i++)
             {
                 // Initialized empty, it will be generated each frame
-                spectrumTexCascade[i] = renDevice.TextureCreate(fmtRG32f, new RDTextureView(), new Godot.Collections.Array<byte[]>(){initialImageRGF.GetData()});
+                // new Godot.Collections.Array<byte[]>(){initialImageRGF.GetData()}
+                spectrumTexCascade[i] = renDevice.TextureCreate(fmtRG32f, new RDTextureView());
                 spectrumUniformCascade[i] = new RDUniform();
                 spectrumUniformCascade[i].UniformType = RenderingDevice.UniformType.Image;
                 spectrumUniformCascade[i].Binding = (int)Binding.Spectrum;
@@ -324,6 +361,8 @@ namespace WaterSystem
             material.SetShaderParameter("cascade_displacements", wavesTextureCascade);
             material.SetShaderParameter("cascade_uv_scales", cascadeScales);
             material.SetShaderParameter("uv_scale", uvScale);
+
+            GD.Print("Spectrum Shader");
 
             /*
             #### Compile & Initialize FFT Shaders
@@ -350,6 +389,8 @@ namespace WaterSystem
             fftSettingsUniform.UniformType = RenderingDevice.UniformType.StorageBuffer;
             fftSettingsUniform.Binding = (int)Binding.Settings;
             fftSettingsUniform.AddId(fftSettingsBuffer);
+
+            GD.Print("FFT Shaders");
 
             // Initialize empty, will be calculated based on the Spectrum
             subPongTex = renDevice.TextureCreate(fmtRG32f, new RDTextureView(), new Godot.Collections.Array<byte[]>(){initialImageRGF.GetData()});
@@ -452,7 +493,7 @@ namespace WaterSystem
 
                 // Build Uniform Set
                 uniformSet = renDevice.UniformSetCreate(new Godot.Collections.Array<RDUniform>(){
-                    spectrumSettingsUniform, initialSpectrumSettingsUniformCascade[cascade], spectrumUniformCascade[cascade],
+                    spectrumSettingsUniform, initialSpectrumUnifromCascade[cascade], spectrumUniformCascade[cascade],
                     pingUniformCascade[cascade], pongUniformCascade[cascade]
                 }, spectrumShader, UniformSet);
 
@@ -574,32 +615,37 @@ namespace WaterSystem
         #region Pack Shader Settings
         private byte[] PackFFTSettings(int subSeqCount)
         {
-            return GD.VarToBytes(new int[]{fftResolution, subSeqCount});
+            return ByteHelper.GetBytes(fftResolution, subSeqCount);
         }
 
         private byte[] PackSpectrumSettings(int cascade)
         {
-            byte[] settingsByte = GD.VarToBytes(new int[]{(int)(horizontalDimension * cascadeScales[cascade])});
-            settingsByte = Combine(settingsByte, GD.VarToBytes(new float[]{choppiness, fftResolution}));
+            // GD.VarToBytes(new float[]{choppiness, fftResolution})
+            byte[] settingsByte = ByteHelper.GetBytes((int)(horizontalDimension * cascadeScales[cascade]));
+            settingsByte = ByteHelper.Combine(settingsByte, ByteHelper.GetBytes(choppiness, fftResolution));
             return settingsByte;
         }
 
         private byte[] PackPhaseSettings(float deltaTime, int cascade)
         {
-            byte[] settingsByte = GD.VarToBytes(new int[]{fftResolution, (int)(horizontalDimension * cascadeScales[cascade])});
-            settingsByte = Combine(settingsByte, GD.VarToBytes(new float[]{deltaTime}));
+            byte[] settingsByte = ByteHelper.GetBytes(fftResolution, (int)(horizontalDimension * cascadeScales[cascade]));
+            settingsByte = ByteHelper.Combine(settingsByte, ByteHelper.GetBytes(deltaTime));
             return settingsByte;
         }
 
         private byte[] PackInitialSpectrumSettings(int cascade)
         {
-            byte[] settingsByte = GD.VarToBytes(new int[]{fftResolution, (int)(horizontalDimension * cascadeScales[cascade])});
-            settingsByte = Combine(settingsByte, GD.VarToBytes(new float[]{cascadeRanges[cascade].X, cascadeRanges[cascade].Y}));
-            settingsByte = Combine(settingsByte, GD.VarToBytes(new Vector2[]{waveVector}));
+            byte[] settingsByte = ByteHelper.GetBytes(fftResolution, (int)(horizontalDimension * cascadeScales[cascade]));
+            settingsByte = ByteHelper.Combine(settingsByte, ByteHelper.GetBytes(cascadeRanges[cascade].X, cascadeRanges[cascade].Y));
+            settingsByte = ByteHelper.Combine(settingsByte, ByteHelper.GetBytes(waveVector.X, waveVector.Y));
             return settingsByte;
         }
         #endregion
         
+        public Texture2Drd GetWavesTexture(int cascade)
+        {
+            return wavesTextureCascade[cascade];
+        }
         public float GetWaveHeight(Vector3 position)
         {
             return 0;
