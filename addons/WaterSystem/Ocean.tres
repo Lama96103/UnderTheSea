@@ -2,25 +2,25 @@
 
 [ext_resource type="Shader" path="res://addons/WaterSystem/shaders/SurfaceVisual.gdshader" id="1_qcdl7"]
 
-[sub_resource type="Texture2DRD" id="Texture2DRD_621nl"]
-texture_rd_rid = RID(36206917902673320)
+[sub_resource type="Texture2DRD" id="Texture2DRD_8kwe1"]
+texture_rd_rid = RID(547616920181980)
 
-[sub_resource type="Texture2DRD" id="Texture2DRD_klw42"]
-texture_rd_rid = RID(36206930787573585)
+[sub_resource type="Texture2DRD" id="Texture2DRD_euc0w"]
+texture_rd_rid = RID(547629805083870)
 
-[sub_resource type="Texture2DRD" id="Texture2DRD_5gvyy"]
-texture_rd_rid = RID(36206943672475445)
+[sub_resource type="Texture2DRD" id="Texture2DRD_rnc43"]
+texture_rd_rid = RID(547642689985760)
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_qcdl7")
 shader_parameter/normal_factor = 1.0
 shader_parameter/cascade_uv_scales = [3.23607, 1.61803, 0.5]
-shader_parameter/uv_scale = 0.00195312
-shader_parameter/wind_uv_offset = Vector2(14.2556, -0.279934)
+shader_parameter/uv_scale = 0.00390625
+shader_parameter/wind_uv_offset = Vector2(8.29249, 0)
 shader_parameter/view_distance_max = 4000.0
 shader_parameter/vertex_resolution = 256.0
-shader_parameter/cascade_displacements = [SubResource("Texture2DRD_621nl"), SubResource("Texture2DRD_klw42"), SubResource("Texture2DRD_5gvyy")]
+shader_parameter/cascade_displacements = [SubResource("Texture2DRD_8kwe1"), SubResource("Texture2DRD_euc0w"), SubResource("Texture2DRD_rnc43")]
 shader_parameter/domain_warp_uv_scale = 6.25e-05
 shader_parameter/domain_warp_strength = 1500.0
 shader_parameter/planetary_curve_strength = 1e-06
