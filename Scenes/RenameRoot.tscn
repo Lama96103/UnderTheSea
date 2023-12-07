@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Scripts/DebugCamera.cs" id="1_ilr4a"]
 [ext_resource type="Environment" uid="uid://8g4qg7p4plxo" path="res://addons/WaterSystem/Environments/AboveWater.tres" id="1_s0w40"]
-[ext_resource type="PackedScene" path="res://addons/MarchingCubes/MarchingCubes.tscn" id="2_spxkd"]
+[ext_resource type="PackedScene" uid="uid://bm3c4mhv235wq" path="res://addons/MarchingCubes/MarchingCubes.tscn" id="2_spxkd"]
 [ext_resource type="Script" path="res://addons/WaterSystem/components/OceanGerstner.cs" id="3_yj8kt"]
 [ext_resource type="Shader" path="res://addons/WaterSystem/shaders/Gerstner.gdshader" id="4_p13yi"]
 [ext_resource type="Script" path="res://Scripts/ShipController.cs" id="5_4o7tr"]

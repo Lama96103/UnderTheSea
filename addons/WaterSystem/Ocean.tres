@@ -3,13 +3,10 @@
 [ext_resource type="Shader" path="res://addons/WaterSystem/shaders/SurfaceVisual.gdshader" id="1_qcdl7"]
 
 [sub_resource type="Texture2DRD" id="Texture2DRD_8kwe1"]
-texture_rd_rid = RID(547616920181980)
 
 [sub_resource type="Texture2DRD" id="Texture2DRD_euc0w"]
-texture_rd_rid = RID(547629805083870)
 
 [sub_resource type="Texture2DRD" id="Texture2DRD_rnc43"]
-texture_rd_rid = RID(547642689985760)
 
 [resource]
 render_priority = 0
